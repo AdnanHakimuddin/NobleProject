@@ -4,3 +4,15 @@
 
 /.vs
 /Presentation/Nop.Web/obj
+/Libraries/Nop.Core/bin/Debug/net6.0
+/Libraries/Nop.Core/obj/Debug/net6.0
+/Libraries/Nop.Data/bin/Debug/net6.0
+/Libraries/Nop.Data/obj/Debug/net6.0/ref
+/Libraries/Nop.Data/obj/Debug/net6.0/refint
+/Libraries/Nop.Services/bin/Debug/net6.0
+/Libraries/Nop.Data/obj/Debug/net6.0
+/Libraries/Nop.Services/obj/Debug/net6.0
+/Presentation/Nop.Web/bin/Debug/net6.0
+/Presentation/Nop.Web/Plugins/bin
+/Presentation/Nop.Web.Framework/bin/Debug/net6.0
+/Presentation/Nop.Web.Framework/obj/Debug/net6.0
