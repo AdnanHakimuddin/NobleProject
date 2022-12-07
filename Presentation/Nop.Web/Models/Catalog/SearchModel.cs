@@ -12,6 +12,10 @@ namespace Nop.Web.Models.Catalog
             AvailableCategories = new List<SelectListItem>();
             AvailableManufacturers = new List<SelectListItem>();
             AvailableVendors = new List<SelectListItem>();
+            AvailableYears = new List<SelectListItem>();
+            AvailableMakes = new List<SelectListItem>();
+            AvailableModels = new List<SelectListItem>();
+            AvailableEngine = new List<SelectListItem>();
             CatalogProductsModel = new CatalogProductsModel();
         }
 
@@ -59,11 +63,31 @@ namespace Nop.Web.Models.Catalog
         /// </summary>
         public bool asv { get; set; }
 
+        [NopResourceDisplayName("Search.Year")]
+        public int yid { get; set; }
+
+        [NopResourceDisplayName("Search.Make")]
+        public int maid { get; set; }
+
+        [NopResourceDisplayName("Search.Model")]
+        public int moid { get; set; }
+        
+        [NopResourceDisplayName("Search.Engine")]
+        public int eid { get; set; }
+        
+        [NopResourceDisplayName("Search.VIN")]
+        public int vin { get; set; }
+
+
         public CatalogProductsModel CatalogProductsModel { get; set; }
 
         public IList<SelectListItem> AvailableCategories { get; set; }
         public IList<SelectListItem> AvailableManufacturers { get; set; }
         public IList<SelectListItem> AvailableVendors { get; set; }
+        public IList<SelectListItem> AvailableYears { get; set; }
+        public IList<SelectListItem> AvailableMakes { get; set; }
+        public IList<SelectListItem> AvailableModels { get; set; }
+        public IList<SelectListItem> AvailableEngine { get; set; }
 
         #region Nested classes
 

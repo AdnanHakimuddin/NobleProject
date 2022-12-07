@@ -285,6 +285,8 @@
         /// </summary>
         public static string CloseConfigurationStepsAttribute => "CloseConfigurationSteps";
 
+        public static string XAuthToken => "XAuthToken";
+
         #endregion
     }
 }

@@ -33,6 +33,10 @@ namespace Nop.Web.Models.Catalog
         /// </summary>
         public int? OrderBy { get; set; }
 
+        public int YearId { get; set; }
+        public int MakeId { get; set; }
+        public int ModelId { get; set; }
+
         /// <summary>
         /// Gets or sets a product sorting
         /// </summary>

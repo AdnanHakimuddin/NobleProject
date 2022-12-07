@@ -691,6 +691,21 @@ namespace Nop.Web.Infrastructure
             endpointRouteBuilder.MapControllerRoute(name: "PageNotFound",
                 pattern: $"{lang}/page-not-found",
                 defaults: new { controller = "Common", action = "PageNotFound" });
+
+            //get makes
+            endpointRouteBuilder.MapControllerRoute(name: "GetMakes",
+                pattern: $"{lang}/get-makes",
+                defaults: new { controller = "Common", action = "GetMakes" });
+
+            //get models
+            endpointRouteBuilder.MapControllerRoute(name: "GetModels",
+                pattern: $"{lang}/get-models",
+                defaults: new { controller = "Common", action = "GetModels" });
+
+            //get engines
+            endpointRouteBuilder.MapControllerRoute(name: "GetEngines",
+                pattern: $"{lang}/get-engines",
+                defaults: new { controller = "Common", action = "GetEngines" });
         }
 
         #endregion

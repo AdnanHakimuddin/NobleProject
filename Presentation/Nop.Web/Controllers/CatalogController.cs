@@ -1,6 +1,10 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Newtonsoft.Json;
 using Nop.Core;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Customers;
@@ -89,6 +93,74 @@ namespace Nop.Web.Controllers
             _mediaSettings = mediaSettings;
             _vendorSettings = vendorSettings;
         }
+
+        #endregion
+
+        #region Utility
+
+        public class ApiModel
+        {
+            public int id { get; set; }
+            public string value { get; set; }
+        }
+
+        private async Task<List<SelectListItem>> PrepareMakeDropdownAsync(string token, int yearId)
+        {
+            var list = new List<SelectListItem>();
+            list.Add(new SelectListItem { Text = "Select Make", Value = "0" });
+
+            if (yearId > 0)
+            {
+                var yearClient = new HttpClient();
+                yearClient.DefaultRequestHeaders.Add("X-AUTH-TOKEN", token);
+                var yearResponse = await yearClient.GetAsync("https://peds.buyparts.biz/api/ymme/makes?yearId=" + yearId);
+                var yearValues = await yearResponse.Content.ReadAsStringAsync();
+                List<ApiModel> response1 = JsonConvert.DeserializeObject<List<ApiModel>>(yearValues);
+
+                foreach (var item in response1)
+                    list.Add(new SelectListItem { Text = item.value, Value = item.id.ToString() });
+            }
+            return list;
+        }
+
+        private async Task<List<SelectListItem>> PrepareModelDropdownAsync(string token, int yearId, int makeId)
+        {
+            var list = new List<SelectListItem>();
+            list.Add(new SelectListItem { Text = "Select Model", Value = "0" });
+
+            if (yearId > 0 && makeId > 0)
+            {
+                var yearClient = new HttpClient();
+                yearClient.DefaultRequestHeaders.Add("X-AUTH-TOKEN", token);
+                var yearResponse = await yearClient.GetAsync("https://peds.buyparts.biz/api/ymme/models?makeId=" + makeId + "&yearId=" + yearId);
+                var yearValues = await yearResponse.Content.ReadAsStringAsync();
+                List<ApiModel> response1 = JsonConvert.DeserializeObject<List<ApiModel>>(yearValues);
+
+                foreach (var item in response1)
+                    list.Add(new SelectListItem { Text = item.value, Value = item.id.ToString() });
+            }
+            return list;
+        }
+
+        private async Task<List<SelectListItem>> PrepareEngineDropdownAsync(string token, int yearId, int makeId, int modelId)
+        {
+            var list = new List<SelectListItem>();
+            list.Add(new SelectListItem { Text = "Select Engine", Value = "0" });
+
+            if (yearId > 0 && makeId > 0 && modelId > 0)
+            {
+                var yearClient = new HttpClient();
+                yearClient.DefaultRequestHeaders.Add("X-AUTH-TOKEN", token);
+                var yearResponse = await yearClient.GetAsync("https://peds.buyparts.biz/api/ymme/engines?makeId=" + makeId + "&modelId=" + modelId + "&yearId=" + yearId);
+                var yearValues = await yearResponse.Content.ReadAsStringAsync();
+                List<ApiModel> response1 = JsonConvert.DeserializeObject<List<ApiModel>>(yearValues);
+
+                foreach (var item in response1)
+                    list.Add(new SelectListItem { Text = item.value, Value = item.id.ToString() });
+            }
+            return list;
+        }
+
 
         #endregion
 
@@ -320,6 +392,45 @@ namespace Nop.Web.Controllers
             model = await _catalogModelFactory.PrepareSearchModelAsync(model, command);
 
             return View(model);
+        }
+
+        public virtual async Task<IActionResult> GetMakes(int yearId)
+        {
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var token = await _genericAttributeService.GetAttributeAsync<string>(customer, NopCustomerDefaults.XAuthToken);
+
+            var list = await PrepareMakeDropdownAsync(token, yearId);
+            return Json(new
+            {
+                success = true,
+                list
+            });
+        }
+        
+        public virtual async Task<IActionResult> GetModels(int yearId, int makeId)
+        {
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var token = await _genericAttributeService.GetAttributeAsync<string>(customer, NopCustomerDefaults.XAuthToken);
+
+            var list = await PrepareModelDropdownAsync(token, yearId, makeId);
+            return Json(new
+            {
+                success = true,
+                list
+            });
+        }
+       
+        public virtual async Task<IActionResult> GetEngines(int yearId, int makeId, int modelId)
+        {
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var token = await _genericAttributeService.GetAttributeAsync<string>(customer, NopCustomerDefaults.XAuthToken);
+
+            var list = await PrepareEngineDropdownAsync(token, yearId, makeId, modelId);
+            return Json(new
+            {
+                success = true,
+                list
+            });
         }
 
         [CheckLanguageSeoCode(true)]

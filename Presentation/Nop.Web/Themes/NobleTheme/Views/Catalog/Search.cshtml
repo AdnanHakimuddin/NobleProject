@@ -9,9 +9,88 @@
 }
 @using Nop.Web.Models.Catalog;
 <script asp-location="Footer">
-    $(document).ready(function () {
+    $(document).ready(function() {
         $("#@Html.IdFor(model => model.advs)").on('click', toggleAdvancedSearch);
         toggleAdvancedSearch();
+
+        $("#@Html.IdFor(model => model.yid)").change(function() {
+            var makeData = {
+                "yearId": $("#yid").val(),
+            };
+            var makes = $("#@Html.IdFor(model => model.maid)");
+            $.ajax({
+                cache: false,
+                type: "GET",
+                url: "@Url.Action("GetMakes", "Catalog")",,
+                data: makeData,
+                success: function(data, textStatus, jqXHR) {
+                    if (data.success) {
+                        makes.html('');
+                        $.each(data.list,
+                            function(id, option) {
+                                makes.append($('<option></option>').val(option.Value).html(option.Text));
+                            });
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    $("#statesAlert").click();
+                }
+            });
+        });
+
+        $("#@Html.IdFor(model => model.maid)").change(function() {
+            var modelData = {
+                "yearId": $("#yid").val(),
+                "makeId": $("#maid").val(),
+            };
+            var models = $("#@Html.IdFor(model => model.moid)");
+            $.ajax({
+                cache: false,
+                type: "GET",
+                url: "@Url.Action("GetModels", "Catalog")",,
+                data: modelData,
+                success: function(data, textStatus, jqXHR) {
+                    if (data.success) {
+                        models.html('');
+                        $.each(data.list,
+                            function(id, option) {
+                                models.append($('<option></option>').val(option.Value).html(option.Text));
+                            });
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    $("#statesAlert").click();
+                }
+            });
+        });
+
+        $("#@Html.IdFor(model => model.moid)").change(function() {
+             var engineData = {
+                "yearId": $("#yid").val(),
+                "makeId": $("#maid").val(),
+                "modelId": $("#moid").val(),
+            };
+            var engines = $("#@Html.IdFor(model => model.eid)");
+            $.ajax({
+                cache: false,
+                type: "GET",
+                url: "@Url.Action("GetEngines", "Catalog")",,
+                data: engineData,
+                success: function(data, textStatus, jqXHR) {
+                    if (data.success) {
+                        engines.html('');
+                        $.each(data.list,
+                            function(id, option) {
+                                engines.append($('<option></option>').val(option.Value).html(option.Text));
+                            });
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    $("#statesAlert").click();
+                }
+            });
+        });
+
     });
     function toggleAdvancedSearch() {
         if ($('#@Html.IdFor(model => model.advs)').is(':checked')) {
@@ -27,65 +106,95 @@
     @await Html.PartialAsync("_CatalogFilters", Model.CatalogProductsModel)
 }
 
-<div class="page search-page">
-    <div class="page-title panel-heading">
-        <h1>@T("Search")</h1>
-    </div>
-    <div class="page-body">
-        <div class="search-input form-horizontal panel-body from-panel">
-            <form asp-route="ProductSearch" method="get">
-                <div class="basic-search">
-                    <div class="form-group">
-                        <label class="control-label col-sm-3 col-md-2" asp-for="q">@T("Search.SearchTerm"):</label>
-                        <div class="col-sm-5 col-md-5">
-                            <input asp-for="q" class="search-text form-control" />
+    <div class="page search-page">
+        <div class="page-title panel-heading">
+            <h1>@T("Search")</h1>
+        </div>
+        <div class="page-body">
+            <div class="search-input form-horizontal panel-body from-panel">
+                <form asp-route="ProductSearch" method="get">
+                    <div class="basic-search">
+                        <div class="form-group">
+                            <label class="control-label col-sm-3 col-md-2" asp-for="q">@T("Search.SearchTerm"):</label>
+                            <div class="col-sm-5 col-md-5">
+                                <input asp-for="q" class="search-text form-control" />
+                            </div>
                         </div>
-                    </div>
-                    @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.ProductSearchPageBasic, additionalData = Model })
-                    <div class="form-group">
-                        <div class="col-sm-offset-3 col-md-offset-2 col-sm-5 col-md-5">
-                            <div class="checkbox custom-checkbox">
-                                <input asp-for="advs" />
-                                <label asp-for="advs">@T("Search.AdvancedSearch")</label>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3 col-md-2" asp-for="yid">@T("Search.Year"):</label>
+                            <div class="col-sm-5 col-md-5">
+                                <select class="form-control dropdown-toggle category-iteam category-select" asp-for="yid" asp-items="Model.AvailableYears"></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3 col-md-2" asp-for="maid">@T("Search.Make"):</label>
+                            <div class="col-sm-5 col-md-5">
+                                <select class="form-control dropdown-toggle category-iteam category-select" asp-for="maid" asp-items="Model.AvailableMakes"></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3 col-md-2" asp-for="moid">@T("Search.Model"):</label>
+                            <div class="col-sm-5 col-md-5">
+                                <select class="form-control dropdown-toggle category-iteam category-select" asp-for="moid" asp-items="Model.AvailableModels"></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3 col-md-2" asp-for="eid">@T("Search.Engine"):</label>
+                            <div class="col-sm-5 col-md-5">
+                                <select class="form-control dropdown-toggle category-iteam category-select" asp-for="eid" asp-items="Model.AvailableEngine"></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3 col-md-2" asp-for="vin">@T("Search.VIN"):</label>
+                            <div class="col-sm-5 col-md-5">
+                                <input asp-for="vin" class="search-text form-control" />
+                            </div>
+                        </div>
+                        @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.ProductSearchPageBasic, additionalData = Model })
+                        <div class="form-group">
+                            <div class="col-sm-offset-3 col-md-offset-2 col-sm-5 col-md-5">
+                                <div class="checkbox custom-checkbox">
+                                    <input asp-for="advs" />
+                                    <label asp-for="advs">@T("Search.AdvancedSearch")</label>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="advanced-search" id="advanced-search-block">
-                    @if (Model.AvailableCategories.Count > 0)
+                    <div class="advanced-search" id="advanced-search-block">
+                        @if (Model.AvailableCategories.Count > 0)
                     {
-                    <div class="form-group">
-                        <label class="control-label col-sm-3 col-md-2" asp-for="cid">@T("Search.Category"):</label>
-                        <div class="col-sm-5 col-md-5">
-                            <select class="form-control dropdown-toggle category-iteam category-select" asp-for="cid" asp-items="Model.AvailableCategories"></select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-sm-offset-3 col-md-offset-2 col-sm-5 col-md-5">
-                            <div class="checkbox custom-checkbox">
-                                <input asp-for="isc" />
-                                <label asp-for="isc">@T("Search.IncludeSubCategories")</label>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3 col-md-2" asp-for="cid">@T("Search.Category"):</label>
+                            <div class="col-sm-5 col-md-5">
+                                <select class="form-control dropdown-toggle category-iteam category-select" asp-for="cid" asp-items="Model.AvailableCategories"></select>
                             </div>
                         </div>
-                    </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-3 col-md-offset-2 col-sm-5 col-md-5">
+                                <div class="checkbox custom-checkbox">
+                                    <input asp-for="isc" />
+                                    <label asp-for="isc">@T("Search.IncludeSubCategories")</label>
+                                </div>
+                            </div>
+                        </div>
                     }
                     @if (Model.AvailableManufacturers.Count > 0)
                     {
-                    <div class="form-group">
-                        <label class="control-label col-sm-3 col-md-2" asp-for="mid">@T("Search.Manufacturer"):</label>
-                        <div class="col-sm-5 col-md-5">
-                            <select class="form-control category-iteam dropdown-toggle" asp-for="mid" asp-items="Model.AvailableManufacturers"></select>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3 col-md-2" asp-for="mid">@T("Search.Manufacturer"):</label>
+                            <div class="col-sm-5 col-md-5">
+                                <select class="form-control category-iteam dropdown-toggle" asp-for="mid" asp-items="Model.AvailableManufacturers"></select>
+                            </div>
                         </div>
-                    </div>
                     }
                     @if (Model.asv && Model.AvailableVendors.Count > 0)
                     {
-                    <div class="form-group">
-                        <label class="control-label col-sm-3 col-md-2" asp-for="vid">@T("Search.Vendor"):</label>
-                        <div class="col-sm-5 col-md-5">
-                            <select asp-for="vid" class="form-control" asp-items="Model.AvailableVendors"></select>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3 col-md-2" asp-for="vid">@T("Search.Vendor"):</label>
+                            <div class="col-sm-5 col-md-5">
+                                <select asp-for="vid" class="form-control" asp-items="Model.AvailableVendors"></select>
+                            </div>
                         </div>
-                    </div>
                     }
                     <div class="form-group">
                         <div class="col-sm-offset-3 col-md-offset-2 col-sm-6 col-md-6">
@@ -113,8 +222,8 @@
             }
             @await Html.PartialAsync("_CatalogProducts", Model.CatalogProductsModel, catalogProductsViewData)
             <script asp-location="Footer">
-                $(document).ready(function () {
-                    $(CatalogProducts).on('before', function (e) {
+                $(document).ready(function() {
+                    $(CatalogProducts).on('before', function(e) {
                         var isAdvanced = $('#@Html.IdFor(model => model.advs)').is(':checked');
 
                         e.payload.urlBuilder
