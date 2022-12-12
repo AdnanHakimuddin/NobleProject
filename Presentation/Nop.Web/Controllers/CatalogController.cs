@@ -393,46 +393,6 @@ namespace Nop.Web.Controllers
 
             return View(model);
         }
-
-        public virtual async Task<IActionResult> GetMakes(int yearId)
-        {
-            var customer = await _workContext.GetCurrentCustomerAsync();
-            var token = await _genericAttributeService.GetAttributeAsync<string>(customer, NopCustomerDefaults.XAuthToken);
-
-            var list = await PrepareMakeDropdownAsync(token, yearId);
-            return Json(new
-            {
-                success = true,
-                list
-            });
-        }
-        
-        public virtual async Task<IActionResult> GetModels(int yearId, int makeId)
-        {
-            var customer = await _workContext.GetCurrentCustomerAsync();
-            var token = await _genericAttributeService.GetAttributeAsync<string>(customer, NopCustomerDefaults.XAuthToken);
-
-            var list = await PrepareModelDropdownAsync(token, yearId, makeId);
-            return Json(new
-            {
-                success = true,
-                list
-            });
-        }
-       
-        public virtual async Task<IActionResult> GetEngines(int yearId, int makeId, int modelId)
-        {
-            var customer = await _workContext.GetCurrentCustomerAsync();
-            var token = await _genericAttributeService.GetAttributeAsync<string>(customer, NopCustomerDefaults.XAuthToken);
-
-            var list = await PrepareEngineDropdownAsync(token, yearId, makeId, modelId);
-            return Json(new
-            {
-                success = true,
-                list
-            });
-        }
-
         [CheckLanguageSeoCode(true)]
         public virtual async Task<IActionResult> SearchTermAutoComplete(string term)
         {
@@ -540,6 +500,67 @@ namespace Nop.Web.Controllers
                 isAvailable = false;
 
             return Task.FromResult(isAvailable);
+        }
+
+        public async Task<IActionResult> GetMakes(int yearId)
+        {
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var token = await _genericAttributeService.GetAttributeAsync<string>(customer, NopCustomerDefaults.XAuthToken);
+
+            var list = await PrepareMakeDropdownAsync(token, yearId);
+            return Json(new
+            {
+                success = true,
+                list
+            });
+        }
+
+        public async Task<IActionResult> GetModels(int yearId, int makeId)
+        {
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var token = await _genericAttributeService.GetAttributeAsync<string>(customer, NopCustomerDefaults.XAuthToken);
+
+            var list = await PrepareModelDropdownAsync(token, yearId, makeId);
+            return Json(new
+            {
+                success = true,
+                list
+            });
+        }
+
+        public async Task<IActionResult> GetEngines(int yearId, int makeId, int modelId)
+        {
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var token = await _genericAttributeService.GetAttributeAsync<string>(customer, NopCustomerDefaults.XAuthToken);
+
+            var list = await PrepareEngineDropdownAsync(token, yearId, makeId, modelId);
+            return Json(new
+            {
+                success = true,
+                list
+            });
+        }
+
+        public class PartGroup
+        {
+            public string id { get; set; }
+            public string name { get; set; }
+            public string engineCode { get; set; }
+            public List<PartType> partTypes { get; set; }
+        }
+
+        public class PartType
+        {
+            public string id { get; set; }
+            public string name { get; set; }
+            public string groupId { get; set; }
+        }
+
+        public class Parts
+        {
+            public string id { get; set; }
+            public string name { get; set; }
+            public List<PartGroup> partGroups { get; set; }
         }
 
         #endregion

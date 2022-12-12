@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Orders;
 using Nop.Web.Models.Catalog;
@@ -39,6 +40,8 @@ namespace Nop.Web.Factories
             bool preparePriceModel = true, bool preparePictureModel = true,
             int? productThumbPictureSize = null, bool prepareSpecificationAttributes = false,
             bool forceRedirectionAfterAddingToCart = false);
+
+       // Task<List<SelectListItem>> PrepareVinLookUpAsync(string token, int yearId, int makeId, int modelId, int engineId, string vin);
 
         /// <summary>
         /// Prepare the product combination models

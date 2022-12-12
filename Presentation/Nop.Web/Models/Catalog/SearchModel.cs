@@ -76,7 +76,7 @@ namespace Nop.Web.Models.Catalog
         public int eid { get; set; }
         
         [NopResourceDisplayName("Search.VIN")]
-        public int vin { get; set; }
+        public string vin { get; set; }
 
 
         public CatalogProductsModel CatalogProductsModel { get; set; }

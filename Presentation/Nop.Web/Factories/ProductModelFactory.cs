@@ -1289,83 +1289,28 @@ namespace Nop.Web.Factories
         }
 
 
-        public virtual async Task<List<SelectListItem>> PrepareVinLookUpAsync(string token, int yearId, int makeId, int modelId, int engineId, string vin)
-        {
-            var list = new List<SelectListItem>();
-            list.Add(new SelectListItem { Text = "Select Make", Value = "0" });
+        //public virtual async Task<List<SelectListItem>> PrepareVinLookUpAsync(string token, int yearId, int makeId, int modelId, int engineId, string vin)
+        //{
+        //    var list = new List<SelectListItem>();
+        //    list.Add(new SelectListItem { Text = "Select Make", Value = "0" });
 
-            if (yearId > 0)
-            {
-                var vinClient = new HttpClient();
-                vinClient.DefaultRequestHeaders.Add("X-AUTH-TOKEN", token);
-                var url = "https://peds.buyparts.biz/api/ymme/vehicles/vin?vin=" + vin;
-                if (yearId > 0 )
-                    url += "&year=" + yearId;
-                if (makeId > 0)
-                    url += "&makeId=" + makeId;
+        //        var vinClient = new HttpClient();
+        //        vinClient.DefaultRequestHeaders.Add("X-AUTH-TOKEN", token);
+        //        var url = "https://peds.buyparts.biz/api/ymme/vehicles/vin?countryId=1&vin=" + vin;
+        //        if (yearId > 0 )
+        //            url += "&year=" + yearId;
+        //        if (makeId > 0)
+        //            url += "&makeId=" + makeId;
 
-                var vinResponse = await vinClient.GetAsync(url);
-                var vinValues = await vinResponse.Content.ReadAsStringAsync();
-                //List<ApiModel> response1 = JsonConvert.DeserializeObject<List<ApiModel>>(vinValues);
+        //        var vinResponse = await vinClient.GetAsync(url);
+        //        var vinValues = await vinResponse.Content.ReadAsStringAsync();
+        //        //List<ApiModel> response1 = JsonConvert.DeserializeObject<List<ApiModel>>(vinValues);
 
-                //foreach (var item in response1)
-                //    list.Add(new SelectListItem { Text = item.value, Value = item.id.ToString() });
-            }
+        //        //foreach (var item in response1)
+        //        //    list.Add(new SelectListItem { Text = item.value, Value = item.id.ToString() });
 
-            return list;
-        }
-
-
-        public virtual async Task<IEnumerable<ProductOverviewModel>> PrepareProductOverviewModelsByApiAsync(int yearId, int makeId, int modelId, int engineId, string vin)
-        {
-            var models = new List<ProductOverviewModel>();
-
-            //if (!string.IsNullOrWhiteSpace(vin))
-            //{
-            //    models.Add
-            //}
-            //foreach (var product in products)
-            //{
-            //    var model = new ProductOverviewModel
-            //    {
-            //        Id = product.Id,
-            //        Name = await _localizationService.GetLocalizedAsync(product, x => x.Name),
-            //        ShortDescription = await _localizationService.GetLocalizedAsync(product, x => x.ShortDescription),
-            //        FullDescription = await _localizationService.GetLocalizedAsync(product, x => x.FullDescription),
-            //        SeName = await _urlRecordService.GetSeNameAsync(product),
-            //        Sku = product.Sku,
-            //        ProductType = product.ProductType,
-            //        MarkAsNew = product.MarkAsNew &&
-            //            (!product.MarkAsNewStartDateTimeUtc.HasValue || product.MarkAsNewStartDateTimeUtc.Value < DateTime.UtcNow) &&
-            //            (!product.MarkAsNewEndDateTimeUtc.HasValue || product.MarkAsNewEndDateTimeUtc.Value > DateTime.UtcNow)
-            //    };
-
-            //    //price
-            //    if (preparePriceModel)
-            //    {
-            //        model.ProductPrice = await PrepareProductOverviewPriceModelAsync(product, forceRedirectionAfterAddingToCart);
-            //    }
-
-            //    //picture
-            //    if (preparePictureModel)
-            //    {
-            //        model.DefaultPictureModel = await PrepareProductOverviewPictureModelAsync(product, productThumbPictureSize);
-            //    }
-
-            //    //specs
-            //    if (prepareSpecificationAttributes)
-            //    {
-            //        model.ProductSpecificationModel = await PrepareProductSpecificationModelAsync(product);
-            //    }
-
-            //    //reviews
-            //    model.ReviewOverviewModel = await PrepareProductReviewOverviewModelAsync(product);
-
-            //    models.Add(model);
-            //}
-
-            return models;
-        }
+        //    return list;
+        //}
 
         /// <summary>
         /// Prepare the product combination models

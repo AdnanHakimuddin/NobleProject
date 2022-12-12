@@ -86,6 +86,8 @@ namespace Nop.Web.Models.Catalog
         /// </summary>
         public IList<ProductOverviewModel> Products { get; set; }
 
+        public ProductDataModel ProductsData { get; set; }
+
         #endregion
 
         #region Ctor
@@ -99,6 +101,7 @@ namespace Nop.Web.Models.Catalog
             AvailableViewModes = new List<SelectListItem>();
             PageSizeOptions = new List<SelectListItem>();
             Products = new List<ProductOverviewModel>();
+            ProductsData = new ProductDataModel();
         }
 
         #endregion

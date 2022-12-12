@@ -1,0 +1,69 @@
+﻿@model ProductDataModel.Part
+@using Nop.Core
+@using Nop.Core.Domain.Catalog
+@using Nop.Core.Domain.Orders
+@using Nop.Core.Domain.Tax
+@inject CatalogSettings catalogSettings
+@inject IWorkContext workContext
+@{
+    //prepare "Add to cart" AJAX link
+    var addtocartlink = "";
+    var shoppingCartTypeId = (int)ShoppingCartType.ShoppingCart;
+    var quantity = 1;
+    //if (Model.ProductPrice.ForceRedirectionAfterAddingToCart)
+    //{
+    //    addtocartlink = Url.RouteUrl("AddProductToCart-Catalog", new { productId = Model.Id, shoppingCartTypeId = shoppingCartTypeId, quantity = quantity, forceredirection = Model.ProductPrice.ForceRedirectionAfterAddingToCart });
+    //}
+    //else
+    //{
+    //    addtocartlink = Url.RouteUrl("AddProductToCart-Catalog", new { productId = Model.Id, shoppingCartTypeId = shoppingCartTypeId, quantity = quantity });
+    //}
+
+    //var addtowishlistlink = Url.RouteUrl("AddProductToCart-Catalog", new { productId = Model.Id, shoppingCartTypeId = (int)ShoppingCartType.Wishlist, quantity = quantity });
+    //var addtocomparelink = Url.RouteUrl("AddProductToCompare", new { productId = Model.Id });
+}
+
+<div class="product-item clearfix">
+    <div class="picture">
+        @if (string.IsNullOrWhiteSpace(Model.imageUrl))
+        {
+            <img class="lazyOwl" alt="@Model.genericDescription" data-src="@Model.imageUrl" src="http://localhost:65283/images/thumbs/default-image_100.png" title="@Model.genericDescription" />
+        }
+        else
+        {
+            <img class="lazyOwl" alt="@Model.genericDescription" data-src="@Model.imageUrl" src="@Model.imageUrl" title="@Model.genericDescription" />
+        }
+    </div>
+    <div class="caption">
+        <div class="details">
+            <h3 class="product-title">
+                <a href="#">@Model.genericDescription</a>
+            </h3>
+            <div class="sku">
+                Manufacturer Name:  @Model.manufacturerName
+                Manufacturer Code:  @Model.manufacturerCode
+                Years:  @Model.years
+            </div>
+
+            <div class="product-border-bottom"></div>
+            <div class="description">
+                @Html.Raw(Model.catLongDescription)
+            </div>
+            <div class="add-info">
+                <div class="buttons">
+                    <div class="prices">
+                        @if (Model.priceAvailable)
+                        {
+                            <span class="price actual-price">@Model.price.unitCost</span>
+                        }
+                        else
+                        {
+                            <span class="price actual-price">0.00</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

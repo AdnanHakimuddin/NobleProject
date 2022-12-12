@@ -1710,6 +1710,13 @@ namespace Nop.Web.Factories
                 : searchModel.q.Trim();
 
             IPagedList<Product> products = new PagedList<Product>(new List<Product>(), 0, 1);
+
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var token = await _genericAttributeService.GetAttributeAsync<string>(customer, NopCustomerDefaults.XAuthToken);
+
+            model.ProductsData = await PrepareSearchDataAsync(token, searchModel.yid, searchModel.maid, searchModel.moid, searchModel.eid);
+
+            //await _productModelFactory.PrepareVinLookUpAsync(token, searchModel.yid, searchModel.maid, searchModel.moid, searchModel.eid, searchModel.vin);
             //only search if query string search keyword is set (used to avoid searching or displaying search term min length error message on /search page load)
             //we don't use "!string.IsNullOrEmpty(searchTerms)" in cases of "ProductSearchTermMinimumLength" set to 0 but searching by other parameters (e.g. category or price filter)
             //var isSearchTermSpecified = _httpContextAccessor.HttpContext.Request.Query.ContainsKey("q");
@@ -1897,7 +1904,7 @@ namespace Nop.Web.Factories
                 return "";
         }
 
-        public virtual async Task<List<SelectListItem>> PrepareYearDropdownAsync(string token)
+        private async Task<List<SelectListItem>> PrepareYearDropdownAsync(string token)
         {
             var list = new List<SelectListItem>();
             list.Add(new SelectListItem { Text = "Select Year", Value = "0" });
@@ -1915,7 +1922,7 @@ namespace Nop.Web.Factories
             return list;
         }
 
-        public virtual async Task<List<SelectListItem>> PrepareMakeDropdownAsync(string token, int yearId)
+        private async Task<List<SelectListItem>> PrepareMakeDropdownAsync(string token, int yearId)
         {
             var list = new List<SelectListItem>();
             list.Add(new SelectListItem { Text = "Select Make", Value = "0" });
@@ -1935,7 +1942,7 @@ namespace Nop.Web.Factories
             return list;
         }
 
-        public virtual async Task<List<SelectListItem>> PrepareModelDropdownAsync(string token, int yearId, int makeId)
+        private async Task<List<SelectListItem>> PrepareModelDropdownAsync(string token, int yearId, int makeId)
         {
             var list = new List<SelectListItem>();
             list.Add(new SelectListItem { Text = "Select Model", Value = "0" });
@@ -1956,7 +1963,7 @@ namespace Nop.Web.Factories
             return list;
         }
 
-        public virtual async Task<List<SelectListItem>> PrepareEngineDropdownAsync(string token, int yearId, int makeId, int modelId)
+        private async Task<List<SelectListItem>> PrepareEngineDropdownAsync(string token, int yearId, int makeId, int modelId)
         {
             var list = new List<SelectListItem>();
             list.Add(new SelectListItem { Text = "Select Engine", Value = "0" });
@@ -1974,6 +1981,114 @@ namespace Nop.Web.Factories
             }
 
             return list;
+        }
+        private async Task<ProductDataModel> PrepareSearchDataAsync(string token, int yearId, int makeId, int modelId, int engineId)
+        {
+            var list = new List<SelectListItem>();
+
+            token = await LoginAuthenticationlAsync();
+            var partsClient = new HttpClient();
+            partsClient.DefaultRequestHeaders.Add("X-AUTH-TOKEN", token);
+            var partsResponse = await partsClient.GetAsync("https://peds.buyparts.biz/api/pti/all-part-categories/en?countryId=2");
+            var partsValues = await partsResponse.Content.ReadAsStringAsync();
+            List<Parts> response1 = JsonConvert.DeserializeObject<List<Parts>>(partsValues);
+
+            var dataClient = new HttpClient();
+            dataClient.DefaultRequestHeaders.Add("X-AUTH-TOKEN", token);
+            var model = new Root();
+            model.disableSellerNetwork = false;
+            model.disableSpecificConditions = false;
+            model.vehicle.specificConditions = new List<object>();
+            model.vehicle.year = yearId;
+            model.vehicle.makeTypeId = 1;
+            model.vehicle.make = makeId;
+            model.vehicle.model = modelId;
+            model.vehicle.engine = engineId;
+            model.storeId = 1000000537;
+            model.storeKey = "XBzDPSlSr8WoBijw";
+            model.coverageKey = "640662256";
+
+            foreach (var item in response1.Select(x => x.partGroups).ToList())
+            {
+                foreach (var item1 in item)
+                {
+                    foreach (var item2 in item1.partTypes)
+                        model.partTypes.Add(item2);
+                }
+            }
+
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
+            client.DefaultRequestHeaders.Add("X-AUTH-TOKEN", token);
+
+            string message = JsonConvert.SerializeObject(model);
+            byte[] messageBytes = System.Text.Encoding.UTF8.GetBytes(message);
+            var content = new ByteArrayContent(messageBytes);
+            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+            var response = client.PostAsync("https://peds.buyparts.biz/api/pti/part-types-search-inquiry?include-specs=false", content).Result;
+            if (response.IsSuccessStatusCode)
+            {
+                var dataValues = await response.Content.ReadAsStringAsync();
+                var data = JsonConvert.DeserializeObject<ProductDataModel>(dataValues);
+                return data;
+            }
+
+            return new ProductDataModel();
+        }
+
+        // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
+
+        public class PartType
+        {
+            public string id { get; set; }
+            public string name { get; set; }
+            public string groupId { get; set; }
+        }
+
+        //
+
+        public class Root
+        {
+            public Root()
+            {
+                vehicle = new Vehicle();
+                partTypes = new List<PartType>();
+            }
+            public bool disableSellerNetwork { get; set; }
+            public bool disableSpecificConditions { get; set; }
+            public Vehicle vehicle { get; set; }
+            public int storeId { get; set; }
+            public string storeKey { get; set; }
+            public string coverageKey { get; set; }
+            public List<PartType> partTypes { get; set; }
+        }
+
+        public class Vehicle
+        {
+            public List<object> specificConditions { get; set; }
+            public int year { get; set; }
+            public int makeTypeId { get; set; }
+            public int make { get; set; }
+            public int model { get; set; }
+            public int engine { get; set; }
+        }
+
+        public class PartGroup
+        {
+            public string id { get; set; }
+            public string name { get; set; }
+            public string engineCode { get; set; }
+            public List<PartType> partTypes { get; set; }
+        }
+
+        public class Parts
+        {
+            public string id { get; set; }
+            public string name { get; set; }
+            public List<PartGroup> partGroups { get; set; }
         }
 
 
