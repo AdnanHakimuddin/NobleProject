@@ -8,6 +8,7 @@ using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Discounts;
 using Nop.Data;
+using Nop.Services.Common;
 using Nop.Services.Customers;
 using Nop.Services.Discounts;
 using Nop.Services.Localization;
@@ -34,6 +35,10 @@ namespace Nop.Services.Catalog
         private readonly IStoreContext _storeContext;
         private readonly IStoreMappingService _storeMappingService;
         private readonly IWorkContext _workContext;
+        private readonly IRepository<Part> _partRepository;
+        private readonly IRepository<Core.Domain.Catalog.PartGroup> _partGroupRepository;
+        private readonly IRepository<Core.Domain.Catalog.PartType> _partTypeRepository;
+
 
         #endregion
 
@@ -50,7 +55,10 @@ namespace Nop.Services.Catalog
             IStaticCacheManager staticCacheManager,
             IStoreContext storeContext,
             IStoreMappingService storeMappingService,
-            IWorkContext workContext)
+            IWorkContext workContext,
+            IRepository<Part> partRepository,
+            IRepository<Core.Domain.Catalog.PartGroup> partGroupRepository,
+            IRepository<Core.Domain.Catalog.PartType> partTypeRepository)
         {
             _aclService = aclService;
             _customerService = customerService;
@@ -63,6 +71,9 @@ namespace Nop.Services.Catalog
             _storeContext = storeContext;
             _storeMappingService = storeMappingService;
             _workContext = workContext;
+            _partRepository = partRepository;
+            _partGroupRepository = partGroupRepository;
+            _partTypeRepository = partTypeRepository;
         }
 
         #endregion
@@ -789,6 +800,45 @@ namespace Nop.Services.Catalog
 
                 return result;
             });
+        }
+
+        #endregion
+
+        #region Part
+
+        public virtual async Task DeleteYearAsync(Part part)
+        {
+            await _partRepository.DeleteAsync(part);
+        }
+
+        public virtual async Task<Part> GetYearByIdAsync(int partId)
+        {
+            return await _partRepository.GetByIdAsync(partId, cache => default);
+        }
+
+        public virtual async Task InsertYearAsync(Part part)
+        {
+            await _partRepository.InsertAsync(part);
+        }
+
+        public virtual async Task UpdateYearAsync(Part part)
+        {
+            await _partRepository.UpdateAsync(part);
+        }
+
+        public virtual async Task<IPagedList<Part>> GetAllYearsAsync(string name = null, int partGroupId = 0,
+            int pageIndex = 0, int pageSize = int.MaxValue)
+        {
+            var query = from y in _partRepository.Table
+                        select y;
+
+            if (!string.IsNullOrWhiteSpace(name))
+                query = query.Where(Y => Y.Name == name);
+
+            if (partGroupId > 0)
+                query = query.Where(Y => Y.PartGroupId == partGroupId);
+
+            return await query.ToPagedListAsync(pageIndex, pageSize);
         }
 
         #endregion
