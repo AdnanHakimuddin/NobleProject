@@ -41,3 +41,4 @@
 /Tests/Nop.Tests/bin/Debug/net6.0
 /Tests/Nop.Tests/obj/Debug/net6.0
 /Presentation/Nop.Web/wwwroot/images/thumbs
+/.cache
