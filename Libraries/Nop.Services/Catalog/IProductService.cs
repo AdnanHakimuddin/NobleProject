@@ -927,5 +927,48 @@ namespace Nop.Services.Catalog
         Task DeleteDiscountProductMappingAsync(DiscountProductMapping discountProductMapping);
 
         #endregion
+
+        #region Year
+
+        Task DeleteYearAsync(Year year);
+        Task<Year> GetYearByIdAsync(int yearId);
+        Task InsertYearAsync(Year year);
+        Task UpdateYearAsync(Year year);
+        Task<IPagedList<Year>> GetAllYearsAsync(string name = null, int yearId = 0,
+          int pageIndex = 0, int pageSize = int.MaxValue);
+        #endregion
+
+        #region Make
+
+        Task DeleteMakeAsync(Make make);
+        Task<Make> GetMakeByIdAsync(int makeId);
+        Task InsertMakeAsync(Make make);
+        Task UpdateMakeAsync(Make make);
+        Task<IPagedList<Make>> GetAllMakesAsync(string name = null, int makeId = 0,
+          int pageIndex = 0, int pageSize = int.MaxValue);
+        #endregion
+
+        #region Model
+
+        Task DeleteModelAsync(Model model);
+        Task<Model> GetModelByIdAsync(int modelId);
+        Task InsertModelAsync(Model model);
+        Task UpdateModelAsync(Model model);
+        Task<IPagedList<Model>> GetAllModelsAsync(string name = null, int modelId = 0,
+          int pageIndex = 0, int pageSize = int.MaxValue);
+
+        #endregion
+
+        #region Engine
+
+        Task DeleteEngineAsync(Engine engine);
+        Task<Engine> GetEngineByIdAsync(int engineId);
+        Task InsertEngineAsync(Engine engine);
+        Task UpdateEngineAsync(Engine engine);
+
+        Task<IPagedList<Engine>> GetAllEnginesAsync(string name = null, int engineId = 0,
+          int pageIndex = 0, int pageSize = int.MaxValue);
+
+        #endregion
     }
 }
