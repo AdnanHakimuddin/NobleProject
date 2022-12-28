@@ -63,6 +63,11 @@ namespace Nop.Services.Catalog
         protected readonly IStoreService _storeService;
         protected readonly IWorkContext _workContext;
         protected readonly LocalizationSettings _localizationSettings;
+        protected readonly IRepository<Year> _yearRepository;
+        protected readonly IRepository<Make> _makeRepository;
+        protected readonly IRepository<Model> _modelRepository;
+        protected readonly IRepository<Engine> _engineRepository;
+
 
         #endregion
 
@@ -101,7 +106,11 @@ namespace Nop.Services.Catalog
             IStoreService storeService,
             IStoreMappingService storeMappingService,
             IWorkContext workContext,
-            LocalizationSettings localizationSettings)
+            LocalizationSettings localizationSettings,
+            IRepository<Year> yearRepository,
+            IRepository<Make> makeRepository,
+            IRepository<Model> modelRepository,
+            IRepository<Engine> engineRepository)
         {
             _catalogSettings = catalogSettings;
             _commonSettings = commonSettings;
@@ -137,6 +146,10 @@ namespace Nop.Services.Catalog
             _storeService = storeService;
             _workContext = workContext;
             _localizationSettings = localizationSettings;
+            _yearRepository = yearRepository;
+            _makeRepository = makeRepository;
+            _modelRepository = modelRepository;
+            _engineRepository = engineRepository;
         }
 
         #endregion
@@ -155,7 +168,7 @@ namespace Nop.Services.Catalog
 
             if (!isMinimumStockReached && !_catalogSettings.PublishBackProductWhenCancellingOrders)
                 return;
-            
+
             switch (product.LowStockActivity)
             {
                 case LowStockActivity.DisableBuyButton:
@@ -458,12 +471,12 @@ namespace Nop.Services.Catalog
                 return new List<CrossSellProduct>();
 
             var query = from csp in _crossSellProductRepository.Table
-                join p in _productRepository.Table on csp.ProductId2 equals p.Id
-                where productIds.Contains(csp.ProductId1) &&
-                      !p.Deleted &&
-                      (showHidden || p.Published)
-                orderby csp.Id
-                select csp;
+                        join p in _productRepository.Table on csp.ProductId2 equals p.Id
+                        where productIds.Contains(csp.ProductId1) &&
+                              !p.Deleted &&
+                              (showHidden || p.Published)
+                        orderby csp.Id
+                        select csp;
             var crossSellProducts = await query.ToListAsync();
 
             return crossSellProducts;
@@ -936,7 +949,8 @@ namespace Nop.Services.Catalog
                         where (!excludeFeaturedProducts || !pc.IsFeaturedProduct) &&
                             categoryIds.Contains(pc.CategoryId)
                         group pc by pc.ProductId into pc
-                        select new { 
+                        select new
+                        {
                             ProductId = pc.Key,
                             DisplayOrder = pc.First().DisplayOrder
                         };
@@ -961,7 +975,8 @@ namespace Nop.Services.Catalog
                         where (!excludeFeaturedProducts || !pm.IsFeaturedProduct) &&
                             manufacturerIds.Contains(pm.ManufacturerId)
                         group pm by pm.ProductId into pm
-                        select new { 
+                        select new
+                        {
                             ProductId = pm.Key,
                             DisplayOrder = pm.First().DisplayOrder
                         };
@@ -1006,7 +1021,7 @@ namespace Nop.Services.Catalog
                         select p;
                 }
             }
-            
+
             return await productsQuery.OrderBy(_localizedPropertyRepository, await _workContext.GetWorkingLanguageAsync(), orderBy).ToPagedListAsync(pageIndex, pageSize);
         }
 
@@ -2674,6 +2689,162 @@ namespace Nop.Services.Catalog
         public virtual async Task DeleteDiscountProductMappingAsync(DiscountProductMapping discountProductMapping)
         {
             await _discountProductMappingRepository.DeleteAsync(discountProductMapping);
+        }
+
+        #endregion
+
+        #region Year
+
+        public virtual async Task DeleteYearAsync(Year year)
+        {
+            await _yearRepository.DeleteAsync(year);
+        }
+
+        public virtual async Task<Year> GetYearByIdAsync(int yearId)
+        {
+            return await _yearRepository.GetByIdAsync(yearId, cache => default);
+        }
+
+        public virtual async Task InsertYearAsync(Year year)
+        {
+            await _yearRepository.InsertAsync(year);
+        }
+
+        public virtual async Task UpdateYearAsync(Year year)
+        {
+            await _yearRepository.UpdateAsync(year);
+        }
+
+        public virtual async Task<IPagedList<Year>> GetAllYearsAsync(string name = null, int yearId = 0,
+            int pageIndex = 0, int pageSize = int.MaxValue)
+        {
+            var query = from y in _yearRepository.Table
+                        select y;
+
+            if (!string.IsNullOrWhiteSpace(name))
+                query = query.Where(Y => Y.Name == name);
+
+            if(yearId > 0)
+                query = query.Where(Y => Y.YearId == yearId);
+
+            return await query.ToPagedListAsync(pageIndex, pageSize);
+        }
+
+        #endregion
+
+        #region Make
+
+        public virtual async Task DeleteMakeAsync(Make make)
+        {
+            await _makeRepository.DeleteAsync(make);
+        }
+
+        public virtual async Task<Make> GetMakeByIdAsync(int makeId)
+        {
+            return await _makeRepository.GetByIdAsync(makeId, cache => default);
+        }
+
+        public virtual async Task InsertMakeAsync(Make make)
+        {
+            await _makeRepository.InsertAsync(make);
+        }
+
+        public virtual async Task UpdateMakeAsync(Make make)
+        {
+            await _makeRepository.UpdateAsync(make);
+        }
+
+        public virtual async Task<IPagedList<Make>> GetAllMakesAsync(string name = null, int makeId = 0,
+            int pageIndex = 0, int pageSize = int.MaxValue)
+        {
+            var query = from y in _makeRepository.Table
+                        select y;
+
+            if (!string.IsNullOrWhiteSpace(name))
+                query = query.Where(Y => Y.Name == name);
+
+            if (makeId > 0)
+                query = query.Where(Y => Y.MakeId == makeId);
+
+            return await query.ToPagedListAsync(pageIndex, pageSize);
+        }
+
+        #endregion
+
+        #region Model
+
+        public virtual async Task DeleteModelAsync(Model model)
+        {
+            await _modelRepository.DeleteAsync(model);
+        }
+
+        public virtual async Task<Model> GetModelByIdAsync(int modelId)
+        {
+            return await _modelRepository.GetByIdAsync(modelId, cache => default);
+        }
+
+        public virtual async Task InsertModelAsync(Model model)
+        {
+            await _modelRepository.InsertAsync(model);
+        }
+
+        public virtual async Task UpdateModelAsync(Model model)
+        {
+            await _modelRepository.UpdateAsync(model);
+        }
+
+        public virtual async Task<IPagedList<Model>> GetAllModelsAsync(string name = null, int modelId = 0,
+            int pageIndex = 0, int pageSize = int.MaxValue)
+        {
+            var query = from y in _modelRepository.Table
+                        select y;
+
+            if (!string.IsNullOrWhiteSpace(name))
+                query = query.Where(Y => Y.Name == name);
+
+            if (modelId > 0)
+                query = query.Where(Y => Y.ModelId == modelId);
+
+            return await query.ToPagedListAsync(pageIndex, pageSize);
+        }
+
+        #endregion
+
+        #region Engine
+
+        public virtual async Task DeleteEngineAsync(Engine engine)
+        {
+            await _engineRepository.DeleteAsync(engine);
+        }
+
+        public virtual async Task<Engine> GetEngineByIdAsync(int engineId)
+        {
+            return await _engineRepository.GetByIdAsync(engineId, cache => default);
+        }
+
+        public virtual async Task InsertEngineAsync(Engine engine)
+        {
+            await _engineRepository.InsertAsync(engine);
+        }
+
+        public virtual async Task UpdateEngineAsync(Engine engine)
+        {
+            await _engineRepository.UpdateAsync(engine);
+        }
+
+        public virtual async Task<IPagedList<Engine>> GetAllEnginesAsync(string name = null, int engineId = 0,
+            int pageIndex = 0, int pageSize = int.MaxValue)
+        {
+            var query = from y in _engineRepository.Table
+                        select y;
+
+            if (!string.IsNullOrWhiteSpace(name))
+                query = query.Where(Y => Y.Name == name);
+
+            if (engineId > 0)
+                query = query.Where(Y => Y.EngineId == engineId);
+
+            return await query.ToPagedListAsync(pageIndex, pageSize);
         }
 
         #endregion
