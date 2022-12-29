@@ -218,6 +218,10 @@ namespace Nop.Web.Areas.Admin.Factories
                     locale.MetaTitle = await _localizationService.GetLocalizedAsync(category, entity => entity.MetaTitle, languageId, false, false);
                     locale.SeName = await _urlRecordService.GetSeNameAsync(category, languageId, false, false);
                 };
+
+                var partGroups = (await _categoryService.GetCategoryPartGroupsByCategoryIdAsync(category.Id)).ToList();
+                foreach (var group in partGroups)
+                    model.SelectedPartGroupIds.Add(group.PartGroupId);
             }
 
             //set default values for the new model
@@ -246,6 +250,11 @@ namespace Nop.Web.Areas.Admin.Factories
             //prepare available parent categories
             await _baseAdminModelFactory.PrepareCategoriesAsync(model.AvailableCategories,
                 defaultItemText: await _localizationService.GetResourceAsync("Admin.Catalog.Categories.Fields.Parent.None"));
+
+            //Prepare part groups
+            await _baseAdminModelFactory.PreparePartGroupsAsync(model.AvailablePartGroups,
+                defaultItemText: await _localizationService.GetResourceAsync("Admin.Catalog.PartGroups.Fields.None"));
+
 
             //prepare model discounts
             var availableDiscounts = await _discountService.GetAllDiscountsAsync(DiscountType.AssignedToCategories, showHidden: true);

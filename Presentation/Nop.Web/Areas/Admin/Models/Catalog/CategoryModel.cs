@@ -32,6 +32,8 @@ namespace Nop.Web.Areas.Admin.Models.Catalog
 
             SelectedStoreIds = new List<int>();
             AvailableStores = new List<SelectListItem>();
+            SelectedPartGroupIds = new List<int>();
+            AvailablePartGroups = new List<SelectListItem>();
 
             CategoryProductSearchModel = new CategoryProductSearchModel();
         }
@@ -119,6 +121,10 @@ namespace Nop.Web.Areas.Admin.Models.Catalog
         public IList<int> SelectedStoreIds { get; set; }
         public IList<SelectListItem> AvailableStores { get; set; }
 
+
+        [NopResourceDisplayName("Admin.Catalog.Categories.Fields.SelectedPartGroupIds")]
+        public IList<int> SelectedPartGroupIds { get; set; }
+        public IList<SelectListItem> AvailablePartGroups { get; set; }
         public IList<SelectListItem> AvailableCategories { get; set; }
 
         //discounts

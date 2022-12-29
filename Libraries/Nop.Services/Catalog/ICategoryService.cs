@@ -292,5 +292,46 @@ namespace Nop.Services.Catalog
         /// The task result contains the category breadcrumb 
         /// </returns>
         Task<IList<Category>> GetCategoryBreadCrumbAsync(Category category, IList<Category> allCategories = null, bool showHidden = false);
+
+        Task<Category> GetCategoryByCategoryApiIdAsync(string apiCategoryId = null);
+        #region Part Group
+
+         Task DeletePartGroupAsync(Core.Domain.Catalog.PartGroup partGroup);
+
+         Task<Core.Domain.Catalog.PartGroup> GetPartGroupByIdAsync(int partGroupId);
+
+         Task InsertPartGroupAsync(Core.Domain.Catalog.PartGroup partGroup);
+         Task UpdatePartGroupAsync(Core.Domain.Catalog.PartGroup partGroup);
+
+        Task<IPagedList<Core.Domain.Catalog.PartGroup>> GetAllPartGroupsAsync(string name = null, int partTypeId = 0,
+            string apiPartGroupId = null, int pageIndex = 0, int pageSize = int.MaxValue);
+
+        #endregion
+
+        #region Part Type
+
+         Task DeletePartTypeAsync(Core.Domain.Catalog.PartType partType);
+
+         Task<Core.Domain.Catalog.PartType> GetPartTypeByIdAsync(int partTypeId);
+         Task InsertPartTypeAsync(Core.Domain.Catalog.PartType partType);
+
+         Task UpdatePartTypeAsync(Core.Domain.Catalog.PartType partType);
+
+         Task<IPagedList<Core.Domain.Catalog.PartType>> GetAllPartTypesAsync(string name = null,
+            string apiPartTypeId = null,int pageIndex = 0, int pageSize = int.MaxValue);
+
+        #endregion
+
+        #region Category Part Group
+
+         Task DeleteCategoryPartGroupAsync(CategoryPartGroup categoryPartGroup);
+         Task<IPagedList<CategoryPartGroup>> GetCategoryPartGroupsByCategoryIdAsync(int categoryId,
+            int pageIndex = 0, int pageSize = int.MaxValue, bool showHidden = false);
+         Task<IList<CategoryPartGroup>> GetCategoryPartGroupsByGroupIdAsync(int partGroupId, bool showHidden = false);
+         Task<CategoryPartGroup> GetCategoryPartGroupByIdAsync(int productCategoryId);
+
+         Task InsertCategoryPartGroupAsync(CategoryPartGroup categoryPartGroup);
+         Task UpdateCategoryPartGroupAsync(CategoryPartGroup categoryPartGroup);
+        #endregion
     }
 }

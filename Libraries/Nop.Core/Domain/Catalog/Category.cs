@@ -132,5 +132,6 @@ namespace Nop.Core.Domain.Catalog
         /// Gets or sets a value indicating whether the price range should be entered manually
         /// </summary>
         public bool ManuallyPriceRange { get; set; }
+        public string ApiCategoryId { get; set; }
     }
 }

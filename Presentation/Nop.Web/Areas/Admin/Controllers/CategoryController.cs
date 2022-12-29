@@ -252,6 +252,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 var category = model.ToEntity<Category>();
                 category.CreatedOnUtc = DateTime.UtcNow;
                 category.UpdatedOnUtc = DateTime.UtcNow;
+
                 await _categoryService.InsertCategoryAsync(category);
 
                 //search engine name
@@ -270,6 +271,16 @@ namespace Nop.Web.Areas.Admin.Controllers
                 }
 
                 await _categoryService.UpdateCategoryAsync(category);
+
+                //Insert Category part group
+                foreach (var partGroupId in model.SelectedPartGroupIds)
+                {
+                    await _categoryService.InsertCategoryPartGroupAsync(new CategoryPartGroup
+                    {
+                        CategoryId = category.Id,
+                        PartGroupId = partGroupId
+                    });
+                }
 
                 //update picture seo file name
                 await UpdatePictureSeoNamesAsync(category);
@@ -374,6 +385,16 @@ namespace Nop.Web.Areas.Admin.Controllers
                     var prevPicture = await _pictureService.GetPictureByIdAsync(prevPictureId);
                     if (prevPicture != null)
                         await _pictureService.DeletePictureAsync(prevPicture);
+                }
+
+                //Insert Category part group
+                foreach (var partGroupId in model.SelectedPartGroupIds)
+                {
+                    await _categoryService.InsertCategoryPartGroupAsync(new CategoryPartGroup
+                    {
+                        CategoryId = category.Id,
+                        PartGroupId = partGroupId
+                    });
                 }
 
                 //update picture seo file name

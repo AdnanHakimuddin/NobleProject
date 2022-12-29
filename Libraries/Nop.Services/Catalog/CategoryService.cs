@@ -1,19 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
 using Nop.Core;
 using Nop.Core.Caching;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Discounts;
 using Nop.Data;
-using Nop.Services.Common;
 using Nop.Services.Customers;
 using Nop.Services.Discounts;
 using Nop.Services.Localization;
 using Nop.Services.Security;
 using Nop.Services.Stores;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Nop.Services.Catalog
 {
@@ -35,10 +35,9 @@ namespace Nop.Services.Catalog
         private readonly IStoreContext _storeContext;
         private readonly IStoreMappingService _storeMappingService;
         private readonly IWorkContext _workContext;
-        private readonly IRepository<Part> _partRepository;
         private readonly IRepository<Core.Domain.Catalog.PartGroup> _partGroupRepository;
         private readonly IRepository<Core.Domain.Catalog.PartType> _partTypeRepository;
-
+        private readonly IRepository<CategoryPartGroup> _categoryPartGroupRepository;
 
         #endregion
 
@@ -56,9 +55,9 @@ namespace Nop.Services.Catalog
             IStoreContext storeContext,
             IStoreMappingService storeMappingService,
             IWorkContext workContext,
-            IRepository<Part> partRepository,
             IRepository<Core.Domain.Catalog.PartGroup> partGroupRepository,
-            IRepository<Core.Domain.Catalog.PartType> partTypeRepository)
+            IRepository<Core.Domain.Catalog.PartType> partTypeRepository,
+            IRepository<CategoryPartGroup> categoryPartGroupRepository)
         {
             _aclService = aclService;
             _customerService = customerService;
@@ -71,9 +70,9 @@ namespace Nop.Services.Catalog
             _storeContext = storeContext;
             _storeMappingService = storeMappingService;
             _workContext = workContext;
-            _partRepository = partRepository;
             _partGroupRepository = partGroupRepository;
             _partTypeRepository = partTypeRepository;
+            _categoryPartGroupRepository = categoryPartGroupRepository;
         }
 
         #endregion
@@ -802,45 +801,144 @@ namespace Nop.Services.Catalog
             });
         }
 
+        public virtual async Task<Category> GetCategoryByCategoryApiIdAsync(string apiCategoryId = null)
+        {
+            var category = from c in _categoryRepository.Table
+                             where c.ApiCategoryId == apiCategoryId && !c.Deleted
+                             select c;
+
+            return await category.FirstOrDefaultAsync();
+        }
+
         #endregion
 
-        #region Part
+        #region Part Group
 
-        public virtual async Task DeleteYearAsync(Part part)
+        public virtual async Task DeletePartGroupAsync(Core.Domain.Catalog.PartGroup partGroup)
         {
-            await _partRepository.DeleteAsync(part);
+            await _partGroupRepository.DeleteAsync(partGroup);
         }
 
-        public virtual async Task<Part> GetYearByIdAsync(int partId)
+        public virtual async Task<Core.Domain.Catalog.PartGroup> GetPartGroupByIdAsync(int partGroupId)
         {
-            return await _partRepository.GetByIdAsync(partId, cache => default);
+            return await _partGroupRepository.GetByIdAsync(partGroupId, cache => default);
         }
 
-        public virtual async Task InsertYearAsync(Part part)
+        public virtual async Task InsertPartGroupAsync(Core.Domain.Catalog.PartGroup partGroup)
         {
-            await _partRepository.InsertAsync(part);
+            await _partGroupRepository.InsertAsync(partGroup);
         }
 
-        public virtual async Task UpdateYearAsync(Part part)
+        public virtual async Task UpdatePartGroupAsync(Core.Domain.Catalog.PartGroup partGroup)
         {
-            await _partRepository.UpdateAsync(part);
+            await _partGroupRepository.UpdateAsync(partGroup);
         }
 
-        public virtual async Task<IPagedList<Part>> GetAllYearsAsync(string name = null, int partGroupId = 0,
-            int pageIndex = 0, int pageSize = int.MaxValue)
+        public virtual async Task<IPagedList<Core.Domain.Catalog.PartGroup>> GetAllPartGroupsAsync(string name = null, int partTypeId = 0,
+            string apiPartGroupId = null, int pageIndex = 0, int pageSize = int.MaxValue)
         {
-            var query = from y in _partRepository.Table
+            var query = from y in _partGroupRepository.Table
                         select y;
 
             if (!string.IsNullOrWhiteSpace(name))
                 query = query.Where(Y => Y.Name == name);
 
-            if (partGroupId > 0)
-                query = query.Where(Y => Y.PartGroupId == partGroupId);
+            if (partTypeId > 0)
+                query = query.Where(Y => Y.PartTypeId == partTypeId);
+
+            if (!string.IsNullOrWhiteSpace(apiPartGroupId))
+                query = query.Where(Y => Y.ApiPartGroupId == apiPartGroupId);
 
             return await query.ToPagedListAsync(pageIndex, pageSize);
         }
 
         #endregion
+
+        #region Part Type
+
+        public virtual async Task DeletePartTypeAsync(Core.Domain.Catalog.PartType partType)
+        {
+            await _partTypeRepository.DeleteAsync(partType);
+        }
+
+        public virtual async Task<Core.Domain.Catalog.PartType> GetPartTypeByIdAsync(int partTypeId)
+        {
+            return await _partTypeRepository.GetByIdAsync(partTypeId, cache => default);
+        }
+
+        public virtual async Task InsertPartTypeAsync(Core.Domain.Catalog.PartType partType)
+        {
+            await _partTypeRepository.InsertAsync(partType);
+        }
+
+        public virtual async Task UpdatePartTypeAsync(Core.Domain.Catalog.PartType partType)
+        {
+            await _partTypeRepository.UpdateAsync(partType);
+        }
+
+        public virtual async Task<IPagedList<Core.Domain.Catalog.PartType>> GetAllPartTypesAsync(string name = null,
+            string apiPartTypeId = null, int pageIndex = 0, int pageSize = int.MaxValue)
+        {
+            var query = from y in _partTypeRepository.Table
+                        select y;
+
+            if (!string.IsNullOrWhiteSpace(name))
+                query = query.Where(Y => Y.Name == name);
+
+            if (!string.IsNullOrWhiteSpace(apiPartTypeId))
+                query = query.Where(Y => Y.ApiPartTypeId == apiPartTypeId);
+
+            return await query.ToPagedListAsync(pageIndex, pageSize);
+        }
+
+        #endregion
+
+        #region Category Part Group
+
+        public virtual async Task DeleteCategoryPartGroupAsync(CategoryPartGroup categoryPartGroup)
+        {
+            await _categoryPartGroupRepository.DeleteAsync(categoryPartGroup);
+        }
+
+        public virtual async Task<IPagedList<CategoryPartGroup>> GetCategoryPartGroupsByCategoryIdAsync(int categoryId,
+            int pageIndex = 0, int pageSize = int.MaxValue, bool showHidden = false)
+        {
+            if (categoryId == 0)
+                return new PagedList<CategoryPartGroup>(new List<CategoryPartGroup>(), pageIndex, pageSize);
+
+            var query = from pc in _categoryPartGroupRepository.Table
+                        join p in _categoryRepository.Table on pc.CategoryId equals p.Id
+                        where pc.CategoryId == categoryId && !p.Deleted
+                        select pc;
+
+            return await query.ToPagedListAsync(pageIndex, pageSize);
+        }
+
+        public virtual async Task<IList<CategoryPartGroup>> GetCategoryPartGroupsByGroupIdAsync(int partGroupId, bool showHidden = false)
+        {
+            var query = from pc in _categoryPartGroupRepository.Table
+                        join p in _partGroupRepository.Table on pc.PartGroupId equals p.Id
+                        where pc.PartGroupId == partGroupId && !p.Deleted
+            select pc;
+
+            return await query.ToListAsync();
+        }
+        public virtual async Task<CategoryPartGroup> GetCategoryPartGroupByIdAsync(int productCategoryId)
+        {
+            return await _categoryPartGroupRepository.GetByIdAsync(productCategoryId, cache => default);
+        }
+
+        public virtual async Task InsertCategoryPartGroupAsync(CategoryPartGroup categoryPartGroup)
+        {
+            await _categoryPartGroupRepository.InsertAsync(categoryPartGroup);
+        }
+
+        public virtual async Task UpdateCategoryPartGroupAsync(CategoryPartGroup categoryPartGroup)
+        {
+            await _categoryPartGroupRepository.UpdateAsync(categoryPartGroup);
+        }
+
+        #endregion
+        
     }
 }

@@ -6,6 +6,7 @@ namespace Nop.Core.Domain.Catalog
     {
         public string Name { get; set; }
         public int GroupId { get; set; }
+        public string ApiPartTypeId { get; set; }
         public bool Deleted { get; set; }
         public DateTime CreatedOn { get; set; }
 

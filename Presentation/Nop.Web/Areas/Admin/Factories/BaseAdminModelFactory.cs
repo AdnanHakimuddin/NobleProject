@@ -1027,6 +1027,22 @@ namespace Nop.Web.Areas.Admin.Factories
             await PrepareDefaultItemAsync(items, withSpecialDefaultItem, defaultItemText, defaultItemValue);
         }
 
+        public virtual async Task PreparePartGroupsAsync(IList<SelectListItem> items, bool withSpecialDefaultItem = true, string defaultItemText = null)
+        {
+            if (items == null)
+                throw new ArgumentNullException(nameof(items));
+
+            //prepare available part groups
+            var availablePartGroups = await _categoryService.GetAllPartGroupsAsync();
+            foreach (var partGroup in availablePartGroups)
+            {
+                items.Add(new SelectListItem { Value = partGroup.Id.ToString(), Text = partGroup.Name });
+            }
+
+            //insert special item for the default value
+            await PrepareDefaultItemAsync(items, withSpecialDefaultItem, defaultItemText);
+        }
+
         #endregion
     }
 }
