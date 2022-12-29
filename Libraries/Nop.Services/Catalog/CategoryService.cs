@@ -42,7 +42,6 @@ namespace Nop.Services.Catalog
         #endregion
 
         #region Ctor
-
         public CategoryService(
             IAclService aclService,
             ICustomerService customerService,
