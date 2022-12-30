@@ -1,6 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Nop.Core.Domain.Catalog;
 using Nop.Web.Areas.Admin.Models.Catalog;
+using Nop.Web.Framework.Models.Extensions;
 
 namespace Nop.Web.Areas.Admin.Factories
 {
@@ -71,5 +73,40 @@ namespace Nop.Web.Areas.Admin.Factories
         /// The task result contains the product list model to add to the category
         /// </returns>
         Task<AddProductToCategoryListModel> PrepareAddProductToCategoryListModelAsync(AddProductToCategorySearchModel searchModel);
+
+        #region Year
+
+        YearSearchModel PrepareYearSearchModelAsync(YearSearchModel searchModel);
+        Task<YearListModel> PrepareYearListModelAsync(YearSearchModel searchModel);
+
+        #endregion
+
+        #region Make
+
+        MakeSearchModel PrepareMakeSearchModelAsync(MakeSearchModel searchModel);
+
+        Task<MakeListModel> PrepareMakeListModelAsync(MakeSearchModel searchModel);
+
+        #endregion
+
+        #region Model
+
+        ModelSearchModel PrepareModelSearchModelAsync(ModelSearchModel searchModel);
+        Task<ModelListModel> PrepareModelListModelAsync(ModelSearchModel searchModel);
+        #endregion
+
+        #region Engine
+
+        EngineSearchModel PrepareEngineSearchModelAsync(EngineSearchModel searchModel);
+
+        Task<EngineListModel> PrepareEngineListModelAsync(EngineSearchModel searchModel);
+
+        #endregion
+
+        #region Engine
+
+        PartGroupSearchModel PreparePartGroupSearchModelAsync(PartGroupSearchModel searchModel);
+        Task<PartGroupListModel> PreparePartGroupListModelAsync(PartGroupSearchModel searchModel);
+        #endregion
     }
 }

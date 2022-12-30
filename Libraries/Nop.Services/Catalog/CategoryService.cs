@@ -833,20 +833,28 @@ namespace Nop.Services.Catalog
             await _partGroupRepository.UpdateAsync(partGroup);
         }
 
-        public virtual async Task<IPagedList<Core.Domain.Catalog.PartGroup>> GetAllPartGroupsAsync(string name = null, int partTypeId = 0,
+        public virtual async Task<IPagedList<Core.Domain.Catalog.PartGroup>> GetAllPartGroupsAsync(string name = null, string partTypeName = null, int partTypeId = 0,
             string apiPartGroupId = null, int pageIndex = 0, int pageSize = int.MaxValue)
         {
             var query = from y in _partGroupRepository.Table
                         select y;
 
             if (!string.IsNullOrWhiteSpace(name))
-                query = query.Where(Y => Y.Name == name);
+                query = query.Where(Y => Y.Name.Contains(name));
 
             if (partTypeId > 0)
                 query = query.Where(Y => Y.PartTypeId == partTypeId);
 
             if (!string.IsNullOrWhiteSpace(apiPartGroupId))
                 query = query.Where(Y => Y.ApiPartGroupId == apiPartGroupId);
+
+            if (!string.IsNullOrWhiteSpace(partTypeName))
+            {
+                query = from g in query
+                        join p in _partTypeRepository.Table on g.PartTypeId equals p.Id
+                        where p.Name.Contains(partTypeName) && !p.Deleted
+                        select g;
+            }
 
             return await query.ToPagedListAsync(pageIndex, pageSize);
         }
