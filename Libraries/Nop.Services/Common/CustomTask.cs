@@ -296,7 +296,7 @@ namespace Nop.Services.Common
                                     CreatedOn = DateTime.UtcNow,
                                     Deleted = false,
                                     Name = type.name,
-                                    ApiPartTypeId = group.id,
+                                    ApiPartTypeId = type.id,
                                     GroupId = partGroup.Id
                                 };
                                 await _categoryService.InsertPartTypeAsync(partType);
@@ -341,7 +341,7 @@ namespace Nop.Services.Common
                                         CreatedOn = DateTime.UtcNow,
                                         Deleted = false,
                                         Name = type.name,
-                                        ApiPartTypeId = group.id,
+                                        ApiPartTypeId = type.id,
                                         GroupId = partGroup.Id
                                     };
                                     await _categoryService.InsertPartTypeAsync(partType);
@@ -361,7 +361,7 @@ namespace Nop.Services.Common
                                         CreatedOn = DateTime.UtcNow,
                                         Deleted = false,
                                         Name = type.name,
-                                        ApiPartTypeId = group.id,
+                                        ApiPartTypeId = type.id,
                                         GroupId = getGroup.FirstOrDefault().Id
                                     };
                                     await _categoryService.InsertPartTypeAsync(partType);
