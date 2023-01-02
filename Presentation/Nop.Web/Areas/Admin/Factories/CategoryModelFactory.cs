@@ -383,5 +383,201 @@ namespace Nop.Web.Areas.Admin.Factories
         }
 
         #endregion
+
+        #region Year
+
+        public virtual YearSearchModel PrepareYearSearchModelAsync(YearSearchModel searchModel)
+        {
+            if (searchModel == null)
+                throw new ArgumentNullException(nameof(searchModel));
+
+            //prepare page parameters
+            searchModel.SetGridPageSize();
+
+            return searchModel;
+        }
+
+        public virtual async Task<YearListModel> PrepareYearListModelAsync(YearSearchModel searchModel)
+        {
+            if (searchModel == null)
+                throw new ArgumentNullException(nameof(searchModel));
+            //get years
+            var years = await _productService.GetAllYearsAsync(name : searchModel.SearchName , pageIndex: searchModel.Page - 1, pageSize: searchModel.PageSize);
+
+            //prepare grid model
+            var model = await new YearListModel().PrepareToGridAsync(searchModel, years, () =>
+            {
+                return years.SelectAwait(async year =>
+                {
+                    //fill in model values from the entity
+                    var yearModel = year.ToModel<YearModel>();
+                    yearModel.CretedOn = year.CreatedOn.ToString();
+
+                    return yearModel;
+                });
+            });
+
+            return model;
+        }
+
+        #endregion
+
+        #region Make
+
+        public virtual MakeSearchModel PrepareMakeSearchModelAsync(MakeSearchModel searchModel)
+        {
+            if (searchModel == null)
+                throw new ArgumentNullException(nameof(searchModel));
+
+            //prepare page parameters
+            searchModel.SetGridPageSize();
+
+            return searchModel;
+        }
+
+        public virtual async Task<MakeListModel> PrepareMakeListModelAsync(MakeSearchModel searchModel)
+        {
+            if (searchModel == null)
+                throw new ArgumentNullException(nameof(searchModel));
+            //get makes
+            var makes = await _productService.GetAllMakesAsync(name: searchModel.SearchName, pageIndex: searchModel.Page - 1, pageSize: searchModel.PageSize);
+
+            //prepare grid model
+            var model = await new MakeListModel().PrepareToGridAsync(searchModel, makes, () =>
+            {
+                return makes.SelectAwait(async make =>
+                {
+                    //fill in model values from the entity
+                    var makeModel = make.ToModel<MakeModel>();
+                    makeModel.CretedOn = make.CreatedOn.ToString();
+
+                    return makeModel;
+                });
+            });
+
+            return model;
+        }
+
+        #endregion
+
+        #region Model
+
+        public virtual ModelSearchModel PrepareModelSearchModelAsync(ModelSearchModel searchModel)
+        {
+            if (searchModel == null)
+                throw new ArgumentNullException(nameof(searchModel));
+
+            //prepare page parameters
+            searchModel.SetGridPageSize();
+
+            return searchModel;
+        }
+
+        public virtual async Task<ModelListModel> PrepareModelListModelAsync(ModelSearchModel searchModel)
+        {
+            if (searchModel == null)
+                throw new ArgumentNullException(nameof(searchModel));
+            //get models
+            var models = await _productService.GetAllModelsAsync(name: searchModel.SearchName, pageIndex: searchModel.Page - 1, pageSize: searchModel.PageSize);
+
+            //prepare grid model
+            var model = await new ModelListModel().PrepareToGridAsync(searchModel, models, () =>
+            {
+                return models.SelectAwait(async modell =>
+                {
+                    //fill in model values from the entity
+                    var modellModel = modell.ToModel<ModelModel>();
+                    modellModel.CretedOn = modell.CreatedOn.ToString();
+
+                    return modellModel;
+                });
+            });
+
+            return model;
+        }
+
+        #endregion
+
+        #region Engine
+
+        public virtual EngineSearchModel PrepareEngineSearchModelAsync(EngineSearchModel searchModel)
+        {
+            if (searchModel == null)
+                throw new ArgumentNullException(nameof(searchModel));
+
+            //prepare page parameters
+            searchModel.SetGridPageSize();
+
+            return searchModel;
+        }
+
+        public virtual async Task<EngineListModel> PrepareEngineListModelAsync(EngineSearchModel searchModel)
+        {
+            if (searchModel == null)
+                throw new ArgumentNullException(nameof(searchModel));
+            //get engines
+            var engines = await _productService.GetAllEnginesAsync(name: searchModel.SearchName, pageIndex: searchModel.Page - 1, pageSize: searchModel.PageSize);
+
+            //prepare grid model
+            var model = await new EngineListModel().PrepareToGridAsync(searchModel, engines, () =>
+            {
+                return engines.SelectAwait(async engine =>
+                {
+                    //fill in model values from the entity
+                    var engineModel = engine.ToModel<EngineModel>();
+                    engineModel.CretedOn = engine.CreatedOn.ToString();
+
+                    return engineModel;
+                });
+            });
+
+            return model;
+        }
+
+        #endregion
+
+        #region Part Groups
+
+        public virtual PartGroupSearchModel PreparePartGroupSearchModelAsync(PartGroupSearchModel searchModel)
+        {
+            if (searchModel == null)
+                throw new ArgumentNullException(nameof(searchModel));
+
+            //prepare page parameters
+            searchModel.SetGridPageSize();
+
+            return searchModel;
+        }
+
+        public virtual async Task<PartGroupListModel> PreparePartGroupListModelAsync(PartGroupSearchModel searchModel)
+        {
+            if (searchModel == null)
+                throw new ArgumentNullException(nameof(searchModel));
+            //get partGroups
+            var partGroups = await _categoryService.GetAllPartGroupsAsync(name: searchModel.SearchName,partTypeName : searchModel.SearchPartTypeName, pageIndex: searchModel.Page - 1, pageSize: searchModel.PageSize);
+
+            //prepare grid model
+            var model = await new PartGroupListModel().PrepareToGridAsync(searchModel, partGroups, () =>
+            {
+                return partGroups.SelectAwait(async group =>
+                {
+                    //fill in model values from the entity
+                    var partGrroupModel = group.ToModel<PartGroupModel>();
+
+                    if (group.PartTypeId > 0)
+                        partGrroupModel.Name = group.Name + "   >>   " + (await _categoryService.GetPartTypeByIdAsync(group.PartTypeId))?.Name;
+                    else
+                        partGrroupModel.Name = group.Name;
+
+                    partGrroupModel.CretedOn = group.CreatedOn.ToString();
+
+                    return partGrroupModel;
+                });
+            });
+
+            return model;
+        }
+
+        #endregion
     }
 }

@@ -167,7 +167,7 @@ namespace Nop.Services.Common
                 var token = await GetToken();
 
                 //Get And Insert Years
-                var years = await GetItem<List<YearModel>>($"https://peds.buyparts.biz/api/ymme/years", null, HttpMethod.Get, token);
+                var years = await GetItem<List<YearApiModel>>($"https://peds.buyparts.biz/api/ymme/years", null, HttpMethod.Get, token);
                 foreach (var year in years)
                 {
                     var getYear = (await _productService.GetAllYearsAsync(yearId: year.id)).ToList();
@@ -183,7 +183,7 @@ namespace Nop.Services.Common
                     });
 
                     //Get And Insert Make
-                    var makes = await GetItem<List<MakeModel>>($"https://peds.buyparts.biz/api/ymme/makes?yearId=" + year.id, null, HttpMethod.Get, token);
+                    var makes = await GetItem<List<MakeApiModel>>($"https://peds.buyparts.biz/api/ymme/makes?yearId=" + year.id, null, HttpMethod.Get, token);
                     foreach (var make in makes)
                     {
                         var getMake = (await _productService.GetAllMakesAsync(makeId: make.id)).ToList();
@@ -200,7 +200,7 @@ namespace Nop.Services.Common
                         });
 
                         //Get And Insert Model
-                        var models = await GetItem<List<ModelModel>>($"https://peds.buyparts.biz/api/ymme/models?makeId=" + make.id + "&yearId=" + year.id, null, HttpMethod.Get, token);
+                        var models = await GetItem<List<ModelApiModel>>($"https://peds.buyparts.biz/api/ymme/models?makeId=" + make.id + "&yearId=" + year.id, null, HttpMethod.Get, token);
                         foreach (var model in models)
                         {
                             var getModel = (await _productService.GetAllModelsAsync(modelId: model.id)).ToList();
@@ -218,7 +218,7 @@ namespace Nop.Services.Common
                             });
 
                             //Get And Insert Engine
-                            var engines = await GetItem<List<EngineModel>>($"https://peds.buyparts.biz/api/ymme/engines?makeId=" + make.id + "&modelId=" + model.id + "&yearId=" + year.id, null, HttpMethod.Get, token);
+                            var engines = await GetItem<List<EngineApiModel>>($"https://peds.buyparts.biz/api/ymme/engines?makeId=" + make.id + "&modelId=" + model.id + "&yearId=" + year.id, null, HttpMethod.Get, token);
                             foreach (var engine in engines)
                             {
                                 var getEngine = (await _productService.GetAllEnginesAsync(engineId: model.id)).ToList();
@@ -296,7 +296,7 @@ namespace Nop.Services.Common
                                     CreatedOn = DateTime.UtcNow,
                                     Deleted = false,
                                     Name = type.name,
-                                    ApiPartTypeId = group.id,
+                                    ApiPartTypeId = type.id,
                                     GroupId = partGroup.Id
                                 };
                                 await _categoryService.InsertPartTypeAsync(partType);
@@ -341,7 +341,7 @@ namespace Nop.Services.Common
                                         CreatedOn = DateTime.UtcNow,
                                         Deleted = false,
                                         Name = type.name,
-                                        ApiPartTypeId = group.id,
+                                        ApiPartTypeId = type.id,
                                         GroupId = partGroup.Id
                                     };
                                     await _categoryService.InsertPartTypeAsync(partType);
@@ -361,7 +361,7 @@ namespace Nop.Services.Common
                                         CreatedOn = DateTime.UtcNow,
                                         Deleted = false,
                                         Name = type.name,
-                                        ApiPartTypeId = group.id,
+                                        ApiPartTypeId = type.id,
                                         GroupId = getGroup.FirstOrDefault().Id
                                     };
                                     await _categoryService.InsertPartTypeAsync(partType);
@@ -385,22 +385,22 @@ namespace Nop.Services.Common
         public string password { get; set; }
     }
 
-    public class YearModel
+    public class YearApiModel
     {
         public int id { get; set; }
         public string value { get; set; }
     }
-    public class MakeModel
+    public class MakeApiModel
     {
         public int id { get; set; }
         public string value { get; set; }
     }
-    public class ModelModel
+    public class ModelApiModel
     {
         public int id { get; set; }
         public string value { get; set; }
     }
-    public class EngineModel
+    public class EngineApiModel
     {
         public int id { get; set; }
         public string value { get; set; }
@@ -411,7 +411,7 @@ namespace Nop.Services.Common
         public string name { get; set; }
         public string groupId { get; set; }
     }
-    public class PartGroup
+    public class PartGroupApiModel
     {
         public string id { get; set; }
         public string name { get; set; }
@@ -423,6 +423,6 @@ namespace Nop.Services.Common
     {
         public string id { get; set; }
         public string name { get; set; }
-        public List<PartGroup> partGroups { get; set; }
+        public List<PartGroupApiModel> partGroups { get; set; }
     }
 }

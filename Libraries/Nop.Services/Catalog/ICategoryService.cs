@@ -303,7 +303,7 @@ namespace Nop.Services.Catalog
          Task InsertPartGroupAsync(Core.Domain.Catalog.PartGroup partGroup);
          Task UpdatePartGroupAsync(Core.Domain.Catalog.PartGroup partGroup);
 
-        Task<IPagedList<Core.Domain.Catalog.PartGroup>> GetAllPartGroupsAsync(string name = null, int partTypeId = 0,
+        Task<IPagedList<Core.Domain.Catalog.PartGroup>> GetAllPartGroupsAsync(string name = null, string partTypeName = null, int partTypeId = 0,
             string apiPartGroupId = null, int pageIndex = 0, int pageSize = int.MaxValue);
 
         #endregion

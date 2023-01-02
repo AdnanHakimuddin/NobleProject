@@ -2722,9 +2722,9 @@ namespace Nop.Services.Catalog
                         select y;
 
             if (!string.IsNullOrWhiteSpace(name))
-                query = query.Where(Y => Y.Name == name);
+                query = query.Where(Y => Y.Name.Contains(name));
 
-            if(yearId > 0)
+            if (yearId > 0)
                 query = query.Where(Y => Y.YearId == yearId);
 
             return await query.ToPagedListAsync(pageIndex, pageSize);
@@ -2761,7 +2761,7 @@ namespace Nop.Services.Catalog
                         select y;
 
             if (!string.IsNullOrWhiteSpace(name))
-                query = query.Where(Y => Y.Name == name);
+                query = query.Where(Y => Y.Name.Contains(name));
 
             if (makeId > 0)
                 query = query.Where(Y => Y.MakeId == makeId);
@@ -2800,7 +2800,7 @@ namespace Nop.Services.Catalog
                         select y;
 
             if (!string.IsNullOrWhiteSpace(name))
-                query = query.Where(Y => Y.Name == name);
+                query = query.Where(Y => Y.Name .Contains(name));
 
             if (modelId > 0)
                 query = query.Where(Y => Y.ModelId == modelId);
@@ -2839,7 +2839,7 @@ namespace Nop.Services.Catalog
                         select y;
 
             if (!string.IsNullOrWhiteSpace(name))
-                query = query.Where(Y => Y.Name == name);
+                query = query.Where(Y => Y.Name.Contains(name));
 
             if (engineId > 0)
                 query = query.Where(Y => Y.EngineId == engineId);

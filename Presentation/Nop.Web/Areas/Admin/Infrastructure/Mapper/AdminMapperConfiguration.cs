@@ -30,6 +30,7 @@ using Nop.Data.Configuration;
 using Nop.Services.Authentication.External;
 using Nop.Services.Authentication.MultiFactor;
 using Nop.Services.Cms;
+using Nop.Services.Common;
 using Nop.Services.Payments;
 using Nop.Services.Plugins;
 using Nop.Services.Shipping;
@@ -456,6 +457,36 @@ namespace Nop.Web.Areas.Admin.Infrastructure.Mapper
 
             CreateMap<ManufacturerTemplate, ManufacturerTemplateModel>();
             CreateMap<ManufacturerTemplateModel, ManufacturerTemplate>();
+
+            //Year
+            CreateMap<Year, YearModel>();
+            CreateMap<YearModel, Year>()
+                .ForMember(entity => entity.CreatedOn, options => options.Ignore())
+                .ForMember(entity => entity.Deleted, options => options.Ignore());
+
+            //Make
+            CreateMap<Make, MakeModel>();
+            CreateMap<MakeModel, Make>()
+                .ForMember(entity => entity.CreatedOn, options => options.Ignore())
+                .ForMember(entity => entity.Deleted, options => options.Ignore());
+
+            //Model
+            CreateMap<Model, ModelModel>();
+            CreateMap<ModelModel, Model>()
+                .ForMember(entity => entity.CreatedOn, options => options.Ignore())
+                .ForMember(entity => entity.Deleted, options => options.Ignore());
+
+            //Engine
+            CreateMap<Engine, EngineModel>();
+            CreateMap<EngineModel, Engine>()
+                .ForMember(entity => entity.CreatedOn, options => options.Ignore())
+                .ForMember(entity => entity.Deleted, options => options.Ignore());
+
+            //Part group
+            CreateMap<PartGroup, PartGroupModel>();
+            CreateMap<PartGroupModel, PartGroup>()
+                .ForMember(entity => entity.CreatedOn, options => options.Ignore())
+                .ForMember(entity => entity.Deleted, options => options.Ignore());
 
             //Review type
             CreateMap<ReviewType, ReviewTypeModel>();
