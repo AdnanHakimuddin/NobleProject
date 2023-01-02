@@ -104,63 +104,70 @@ namespace Nop.Web.Controllers
             public string value { get; set; }
         }
 
-        private async Task<List<SelectListItem>> PrepareMakeDropdownAsync(string token, int yearId)
+        private async Task<List<SelectListItem>> PrepareMakeDropdownAsync(int yearId)
         {
             var list = new List<SelectListItem>();
             list.Add(new SelectListItem { Text = "Select Make", Value = "0" });
 
             if (yearId > 0)
             {
-                var yearClient = new HttpClient();
-                yearClient.DefaultRequestHeaders.Add("X-AUTH-TOKEN", token);
-                var yearResponse = await yearClient.GetAsync("https://peds.buyparts.biz/api/ymme/makes?yearId=" + yearId);
-                var yearValues = await yearResponse.Content.ReadAsStringAsync();
-                List<ApiModel> response1 = JsonConvert.DeserializeObject<List<ApiModel>>(yearValues);
-
-                foreach (var item in response1)
-                    list.Add(new SelectListItem { Text = item.value, Value = item.id.ToString() });
+                var makes = await _productService.GetAllMakesAsync(yearId: yearId);
+                foreach (var make in makes)
+                    list.Add(new SelectListItem { Text = make.Name, Value = make.Id.ToString() });
             }
             return list;
         }
 
-        private async Task<List<SelectListItem>> PrepareModelDropdownAsync(string token, int yearId, int makeId)
+        private async Task<List<SelectListItem>> PrepareModelDropdownAsync(int yearId, int makeId)
         {
             var list = new List<SelectListItem>();
             list.Add(new SelectListItem { Text = "Select Model", Value = "0" });
 
             if (yearId > 0 && makeId > 0)
             {
-                var yearClient = new HttpClient();
-                yearClient.DefaultRequestHeaders.Add("X-AUTH-TOKEN", token);
-                var yearResponse = await yearClient.GetAsync("https://peds.buyparts.biz/api/ymme/models?makeId=" + makeId + "&yearId=" + yearId);
-                var yearValues = await yearResponse.Content.ReadAsStringAsync();
-                List<ApiModel> response1 = JsonConvert.DeserializeObject<List<ApiModel>>(yearValues);
-
-                foreach (var item in response1)
-                    list.Add(new SelectListItem { Text = item.value, Value = item.id.ToString() });
+                var models = await _productService.GetAllModelsAsync(yearId: yearId, makeId: makeId);
+                foreach (var model in models)
+                    list.Add(new SelectListItem { Text = model.Name, Value = model.Id.ToString() });
             }
             return list;
         }
 
-        private async Task<List<SelectListItem>> PrepareEngineDropdownAsync(string token, int yearId, int makeId, int modelId)
+        private async Task<List<SelectListItem>> PrepareEngineDropdownAsync(int yearId, int makeId, int modelId)
         {
             var list = new List<SelectListItem>();
             list.Add(new SelectListItem { Text = "Select Engine", Value = "0" });
 
             if (yearId > 0 && makeId > 0 && modelId > 0)
             {
-                var yearClient = new HttpClient();
-                yearClient.DefaultRequestHeaders.Add("X-AUTH-TOKEN", token);
-                var yearResponse = await yearClient.GetAsync("https://peds.buyparts.biz/api/ymme/engines?makeId=" + makeId + "&modelId=" + modelId + "&yearId=" + yearId);
-                var yearValues = await yearResponse.Content.ReadAsStringAsync();
-                List<ApiModel> response1 = JsonConvert.DeserializeObject<List<ApiModel>>(yearValues);
-
-                foreach (var item in response1)
-                    list.Add(new SelectListItem { Text = item.value, Value = item.id.ToString() });
+                var engines = await _productService.GetAllEnginesAsync(yearId: yearId, makeId: makeId, modelId: modelId);
+                foreach (var engine in engines)
+                    list.Add(new SelectListItem { Text = engine.Name, Value = engine.Id.ToString() });
             }
             return list;
         }
 
+        private async Task<List<SelectListItem>> PreparePartGroupDropdownAsync()
+        {
+            var list = new List<SelectListItem>();
+            list.Add(new SelectListItem { Text = "Select Part Group", Value = "0" });
+
+            var partGroups = await _categoryService.GetAllPartGroupsAsync();
+            foreach (var partGroup in partGroups)
+                list.Add(new SelectListItem { Text = partGroup.Name, Value = partGroup.Id.ToString() });
+
+            return list;
+        }
+        private async Task<List<SelectListItem>> PreparePartTypesDropdownAsync(int partGroupId)
+        {
+            var list = new List<SelectListItem>();
+            list.Add(new SelectListItem { Text = "Select Part Type", Value = "0" });
+
+            var partTypes = await _categoryService.GetAllPartTypesAsync(partGroupId: partGroupId);
+            foreach (var partType in partTypes)
+                list.Add(new SelectListItem { Text = partType.Name, Value = partType.Id.ToString() });
+
+            return list;
+        }
 
         #endregion
 
@@ -507,7 +514,7 @@ namespace Nop.Web.Controllers
             var customer = await _workContext.GetCurrentCustomerAsync();
             var token = await _genericAttributeService.GetAttributeAsync<string>(customer, NopCustomerDefaults.XAuthToken);
 
-            var list = await PrepareMakeDropdownAsync(token, yearId);
+            var list = await PrepareMakeDropdownAsync(yearId);
             return Json(new
             {
                 success = true,
@@ -520,7 +527,7 @@ namespace Nop.Web.Controllers
             var customer = await _workContext.GetCurrentCustomerAsync();
             var token = await _genericAttributeService.GetAttributeAsync<string>(customer, NopCustomerDefaults.XAuthToken);
 
-            var list = await PrepareModelDropdownAsync(token, yearId, makeId);
+            var list = await PrepareModelDropdownAsync(yearId, makeId);
             return Json(new
             {
                 success = true,
@@ -533,7 +540,20 @@ namespace Nop.Web.Controllers
             var customer = await _workContext.GetCurrentCustomerAsync();
             var token = await _genericAttributeService.GetAttributeAsync<string>(customer, NopCustomerDefaults.XAuthToken);
 
-            var list = await PrepareEngineDropdownAsync(token, yearId, makeId, modelId);
+            var list = await PrepareEngineDropdownAsync(yearId, makeId, modelId);
+            return Json(new
+            {
+                success = true,
+                list
+            });
+        }
+
+        public async Task<IActionResult> GetPartTypes(int partGroupId)
+        {
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var token = await _genericAttributeService.GetAttributeAsync<string>(customer, NopCustomerDefaults.XAuthToken);
+
+            var list = await PreparePartTypesDropdownAsync(partGroupId);
             return Json(new
             {
                 success = true,

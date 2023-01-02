@@ -1666,12 +1666,14 @@ namespace Nop.Web.Factories
                 }
             }
 
-            var token = await LoginAuthenticationlAsync();
+            //var token = await LoginAuthenticationlAsync();
 
-            model.AvailableYears = await PrepareYearDropdownAsync(token);
-            model.AvailableMakes = await PrepareMakeDropdownAsync(token, model.yid);
-            model.AvailableModels = await PrepareModelDropdownAsync(token, model.yid, model.maid);
-            model.AvailableEngine = await PrepareEngineDropdownAsync(token, model.yid, model.maid, model.moid);
+            model.AvailableYears = await PrepareYearDropdownAsync();
+            model.AvailableMakes = await PrepareMakeDropdownAsync(model.yid);
+            model.AvailableModels = await PrepareModelDropdownAsync(model.yid, model.maid);
+            model.AvailableEngine = await PrepareEngineDropdownAsync(model.yid, model.maid, model.moid);
+            model.AvailablePartGroups = await PreparePartGroupDropdownAsync();
+            model.AvailablePartTypes = await PreparePartTypesDropdownAsync(model.pgid);
 
             model.CatalogProductsModel = await PrepareSearchProductsModelAsync(model, command);
 
@@ -1714,7 +1716,7 @@ namespace Nop.Web.Factories
             var customer = await _workContext.GetCurrentCustomerAsync();
             var token = await _genericAttributeService.GetAttributeAsync<string>(customer, NopCustomerDefaults.XAuthToken);
 
-            model.ProductsData = await PrepareSearchDataAsync(token, searchModel.yid, searchModel.maid, searchModel.moid, searchModel.eid);
+            model.ProductsData = await PrepareSearchDataAsync(searchModel.yid, searchModel.maid, searchModel.moid, searchModel.eid, searchModel.pgid, searchModel.ptid);
 
             //await _productModelFactory.PrepareVinLookUpAsync(token, searchModel.yid, searchModel.maid, searchModel.moid, searchModel.eid, searchModel.vin);
             //only search if query string search keyword is set (used to avoid searching or displaying search term min length error message on /search page load)
@@ -1892,7 +1894,7 @@ namespace Nop.Web.Factories
             var client = new HttpClient();
             var content = new StringContent(JsonConvert.SerializeObject(new Login { username = "AccelStg", password = "mS2.wN5!" }));
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            var response = await client.PostAsync("https://peds.buyparts.biz/api/login", content);
+            var response = await client.PostAsync(_catalogSettings.ApiUrl + "/login", content);
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
@@ -1904,94 +1906,95 @@ namespace Nop.Web.Factories
                 return "";
         }
 
-        private async Task<List<SelectListItem>> PrepareYearDropdownAsync(string token)
+        private async Task<List<SelectListItem>> PrepareYearDropdownAsync()
         {
             var list = new List<SelectListItem>();
             list.Add(new SelectListItem { Text = "Select Year", Value = "0" });
 
-            var yearClient = new HttpClient();
-            yearClient.DefaultRequestHeaders.Add("X-AUTH-TOKEN", token);
-            var yearResponse = await yearClient.GetAsync("https://peds.buyparts.biz/api/ymme/years");
-
-            var yearValues = await yearResponse.Content.ReadAsStringAsync();
-            List<ApiModel> response1 = JsonConvert.DeserializeObject<List<ApiModel>>(yearValues);
-
-            foreach (var item in response1)
-                list.Add(new SelectListItem { Text = item.value, Value = item.id.ToString() });
+            var years = await _productService.GetAllYearsAsync();
+            foreach (var year in years)
+                list.Add(new SelectListItem { Text = year.Name, Value = year.Id.ToString() });
 
             return list;
         }
 
-        private async Task<List<SelectListItem>> PrepareMakeDropdownAsync(string token, int yearId)
+        private async Task<List<SelectListItem>> PrepareMakeDropdownAsync(int yearId)
         {
             var list = new List<SelectListItem>();
             list.Add(new SelectListItem { Text = "Select Make", Value = "0" });
 
             if (yearId > 0)
             {
-                var yearClient = new HttpClient();
-                yearClient.DefaultRequestHeaders.Add("X-AUTH-TOKEN", token);
-                var yearResponse = await yearClient.GetAsync("https://peds.buyparts.biz/api/ymme/makes?yearId=" + yearId);
-                var yearValues = await yearResponse.Content.ReadAsStringAsync();
-                List<ApiModel> response1 = JsonConvert.DeserializeObject<List<ApiModel>>(yearValues);
-
-                foreach (var item in response1)
-                    list.Add(new SelectListItem { Text = item.value, Value = item.id.ToString() });
+                var makes = await _productService.GetAllMakesAsync(yearId: yearId);
+                foreach (var make in makes)
+                    list.Add(new SelectListItem { Text = make.Name, Value = make.Id.ToString() });
             }
 
             return list;
         }
 
-        private async Task<List<SelectListItem>> PrepareModelDropdownAsync(string token, int yearId, int makeId)
+        private async Task<List<SelectListItem>> PrepareModelDropdownAsync(int yearId, int makeId)
         {
             var list = new List<SelectListItem>();
             list.Add(new SelectListItem { Text = "Select Model", Value = "0" });
 
             if (yearId > 0 && makeId > 0)
             {
-                var yearClient = new HttpClient();
-                yearClient.DefaultRequestHeaders.Add("X-AUTH-TOKEN", token);
-                var yearResponse = await yearClient.GetAsync("https://peds.buyparts.biz/api/ymme/models?makeId=" + makeId + "&yearId=" + yearId);
-                var yearValues = await yearResponse.Content.ReadAsStringAsync();
-                List<ApiModel> response1 = JsonConvert.DeserializeObject<List<ApiModel>>(yearValues);
-
-                foreach (var item in response1)
-                    list.Add(new SelectListItem { Text = item.value, Value = item.id.ToString() });
-
+                var models = await _productService.GetAllModelsAsync(yearId: yearId, makeId: makeId);
+                foreach (var model in models)
+                    list.Add(new SelectListItem { Text = model.Name, Value = model.Id.ToString() });
             }
 
             return list;
         }
 
-        private async Task<List<SelectListItem>> PrepareEngineDropdownAsync(string token, int yearId, int makeId, int modelId)
+        private async Task<List<SelectListItem>> PrepareEngineDropdownAsync(int yearId, int makeId, int modelId)
         {
             var list = new List<SelectListItem>();
             list.Add(new SelectListItem { Text = "Select Engine", Value = "0" });
 
             if (yearId > 0 && makeId > 0 && modelId > 0)
             {
-                var yearClient = new HttpClient();
-                yearClient.DefaultRequestHeaders.Add("X-AUTH-TOKEN", token);
-                var yearResponse = await yearClient.GetAsync("https://peds.buyparts.biz/api/ymme/engines?makeId=" + makeId + "&modelId=" + modelId + "&yearId=" + yearId);
-                var yearValues = await yearResponse.Content.ReadAsStringAsync();
-                List<ApiModel> response1 = JsonConvert.DeserializeObject<List<ApiModel>>(yearValues);
-
-                foreach (var item in response1)
-                    list.Add(new SelectListItem { Text = item.value, Value = item.id.ToString() });
+                var engines = await _productService.GetAllEnginesAsync(yearId: yearId, makeId: makeId, modelId: modelId);
+                foreach (var engine in engines)
+                    list.Add(new SelectListItem { Text = engine.Name, Value = engine.Id.ToString() });
             }
+            return list;
+        }
+
+        private async Task<List<SelectListItem>> PreparePartGroupDropdownAsync()
+        {
+            var list = new List<SelectListItem>();
+            list.Add(new SelectListItem { Text = "Select Part Group", Value = "0" });
+
+            var partGroups = await _categoryService.GetAllPartGroupsAsync();
+            foreach (var partGroup in partGroups)
+                list.Add(new SelectListItem { Text = partGroup.Name, Value = partGroup.Id.ToString() });
 
             return list;
         }
-        private async Task<ProductDataModel> PrepareSearchDataAsync(string token, int yearId, int makeId, int modelId, int engineId)
+        private async Task<List<SelectListItem>> PreparePartTypesDropdownAsync(int partGroupId)
+        {
+            var list = new List<SelectListItem>();
+            list.Add(new SelectListItem { Text = "Select Part Type", Value = "0" });
+
+            var partTypes = await _categoryService.GetAllPartTypesAsync(partGroupId: partGroupId);
+            foreach (var partType in partTypes)
+                list.Add(new SelectListItem { Text = partType.Name, Value = partType.Id.ToString() });
+
+            return list;
+        }
+
+        private async Task<ProductDataModel> PrepareSearchDataAsync(int yearId, int makeId, int modelId, int engineId, int partGroupId, int partTypeId)
         {
             var list = new List<SelectListItem>();
 
-            token = await LoginAuthenticationlAsync();
-            var partsClient = new HttpClient();
-            partsClient.DefaultRequestHeaders.Add("X-AUTH-TOKEN", token);
-            var partsResponse = await partsClient.GetAsync("https://peds.buyparts.biz/api/pti/all-part-categories/en?countryId=2");
-            var partsValues = await partsResponse.Content.ReadAsStringAsync();
-            List<Parts> response1 = JsonConvert.DeserializeObject<List<Parts>>(partsValues);
+            var token = await LoginAuthenticationlAsync();
+            //var partsClient = new HttpClient();
+            //partsClient.DefaultRequestHeaders.Add("X-AUTH-TOKEN", token);
+            //var partsResponse = await partsClient.GetAsync("https://peds.buyparts.biz/api/pti/all-part-categories/en?countryId=2");
+            //var partsValues = await partsResponse.Content.ReadAsStringAsync();
+            //List<Parts> response1 = JsonConvert.DeserializeObject<List<Parts>>(partsValues);
 
             var dataClient = new HttpClient();
             dataClient.DefaultRequestHeaders.Add("X-AUTH-TOKEN", token);
@@ -2008,12 +2011,33 @@ namespace Nop.Web.Factories
             model.storeKey = "XBzDPSlSr8WoBijw";
             model.coverageKey = "640662256";
 
-            foreach (var item in response1.Select(x => x.partGroups).ToList())
+
+            var partGroup = await _categoryService.GetPartGroupByIdAsync(partGroupId);
+            if (partGroup is not null)
             {
-                foreach (var item1 in item)
+                var partTypes = await _categoryService.GetAllPartTypesAsync(partGroupId: partGroupId);
+                foreach (var item1 in partTypes)
                 {
-                    foreach (var item2 in item1.partTypes)
-                        model.partTypes.Add(item2);
+                    model.partTypes.Add(new PartType
+                    {
+                        groupId = partGroup.ApiPartGroupId,
+                        id = item1.ApiPartTypeId.ToString(),
+                        name = item1.Name
+                    });
+                }
+            }
+
+            if (partTypeId > 0)
+            {
+                var partType = await _categoryService.GetPartTypeByIdAsync(partTypeId);
+                if (partType is not null)
+                {
+                    model.partTypes.Add(new PartType
+                    {
+                        groupId = partGroup.ApiPartGroupId,
+                        id = partType.ApiPartTypeId.ToString(),
+                        name = partType.Name
+                    });
                 }
             }
 
@@ -2028,7 +2052,7 @@ namespace Nop.Web.Factories
             var content = new ByteArrayContent(messageBytes);
             content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
-            var response = client.PostAsync("https://peds.buyparts.biz/api/pti/part-types-search-inquiry?include-specs=false", content).Result;
+            var response = client.PostAsync(_catalogSettings.ApiUrl+"/pti/part-types-search-inquiry?include-specs=false", content).Result;
             if (response.IsSuccessStatusCode)
             {
                 var dataValues = await response.Content.ReadAsStringAsync();

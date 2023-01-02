@@ -2754,7 +2754,7 @@ namespace Nop.Services.Catalog
             await _makeRepository.UpdateAsync(make);
         }
 
-        public virtual async Task<IPagedList<Make>> GetAllMakesAsync(string name = null, int makeId = 0,
+        public virtual async Task<IPagedList<Make>> GetAllMakesAsync(string name = null, int makeId = 0, int yearId = 0,
             int pageIndex = 0, int pageSize = int.MaxValue)
         {
             var query = from y in _makeRepository.Table
@@ -2793,7 +2793,7 @@ namespace Nop.Services.Catalog
             await _modelRepository.UpdateAsync(model);
         }
 
-        public virtual async Task<IPagedList<Model>> GetAllModelsAsync(string name = null, int modelId = 0,
+        public virtual async Task<IPagedList<Model>> GetAllModelsAsync(string name = null, int modelId = 0, int yearId = 0, int makeId = 0,
             int pageIndex = 0, int pageSize = int.MaxValue)
         {
             var query = from y in _modelRepository.Table
@@ -2832,7 +2832,7 @@ namespace Nop.Services.Catalog
             await _engineRepository.UpdateAsync(engine);
         }
 
-        public virtual async Task<IPagedList<Engine>> GetAllEnginesAsync(string name = null, int engineId = 0,
+        public virtual async Task<IPagedList<Engine>> GetAllEnginesAsync(string name = null, int engineId = 0, int yearId = 0, int makeId = 0, int modelId = 0,
             int pageIndex = 0, int pageSize = int.MaxValue)
         {
             var query = from y in _engineRepository.Table
@@ -2843,6 +2843,15 @@ namespace Nop.Services.Catalog
 
             if (engineId > 0)
                 query = query.Where(Y => Y.EngineId == engineId);
+            
+            if (yearId > 0)
+                query = query.Where(Y => Y.YearId == yearId);
+            
+            if (makeId > 0)
+                query = query.Where(Y => Y.MakeId == makeId);
+            
+            if (modelId > 0)
+                query = query.Where(Y => Y.ModelId == modelId);
 
             return await query.ToPagedListAsync(pageIndex, pageSize);
         }
