@@ -192,3 +192,14 @@
 /Presentation/Nop.Web/Plugins/Widgets.NivoSlider/Scripts/jquery.nivo.slider.js
 /Presentation/Nop.Web/Plugins/MultiFactorAuth.GoogleAuthenticator/runtimes/linux-musl-x64/native/libSkiaSharp.so
 /Presentation/Nop.Web/App_Data/appsettings.json
+/Libraries/Nop.Core/bin/Release/net6.0
+/Libraries/Nop.Core/obj/Release/net6.0
+/Libraries/Nop.Data/bin/Release/net6.0
+/Libraries/Nop.Data/obj/Release/net6.0
+/Libraries/Nop.Services/bin/Release/net6.0
+/Libraries/Nop.Services/obj/Release/net6.0
+/Presentation/Nop.Web/bin/Release/net6.0
+/Presentation/Nop.Web/Properties/PublishProfiles
+/Presentation/Nop.Web.Framework/bin/Release/net6.0
+/Presentation/Nop.Web.Framework/obj/Release/net6.0
+*.user
