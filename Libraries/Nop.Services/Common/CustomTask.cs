@@ -7,6 +7,7 @@ using Nop.Services.Catalog;
 using Nop.Services.EuropaCheckVatService;
 using Nop.Services.Logging;
 using Nop.Services.ScheduleTasks;
+using Nop.Services.Seo;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,6 +27,7 @@ namespace Nop.Services.Common
         private readonly INopDataProvider _nopDataProvider;
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
+        private readonly IUrlRecordService _urlRecordService;
 
         #endregion
 
@@ -34,12 +36,14 @@ namespace Nop.Services.Common
         public CustomTask(ILogger logger,
             INopDataProvider nopDataProvider,
             IProductService productService,
-            ICategoryService categoryService)
+            ICategoryService categoryService,
+            IUrlRecordService urlRecordService)
         {
             _logger = logger;
             _nopDataProvider = nopDataProvider;
             _productService = productService;
             _categoryService = categoryService;
+            _urlRecordService = urlRecordService;
         }
 
         #endregion
@@ -170,70 +174,74 @@ namespace Nop.Services.Common
                 var years = await GetItem<List<YearModel>>($"https://peds.buyparts.biz/api/ymme/years", null, HttpMethod.Get, token);
                 foreach (var year in years)
                 {
+                    var entityYear = new Core.Domain.Catalog.Year();
                     var getYear = (await _productService.GetAllYearsAsync(yearId: year.id)).ToList();
                     if (getYear.Count > 0)
-                        continue;
-
-                    await _productService.InsertYearAsync(new Nop.Core.Domain.Catalog.Year
+                        entityYear = getYear.FirstOrDefault();
+                    else
                     {
-                        CreatedOn = DateTime.Now,
-                        Deleted = false,
-                        Name = year.value,
-                        YearId = year.id
-                    });
+                        entityYear.CreatedOn = DateTime.Now;
+                        entityYear.Deleted = false;
+                        entityYear.Name = year.value;
+                        entityYear.YearId = year.id;
+                        await _productService.InsertYearAsync(entityYear);
+                    }
 
                     //Get And Insert Make
                     var makes = await GetItem<List<MakeModel>>($"https://peds.buyparts.biz/api/ymme/makes?yearId=" + year.id, null, HttpMethod.Get, token);
                     foreach (var make in makes)
                     {
+                        var entityMake = new Make();
                         var getMake = (await _productService.GetAllMakesAsync(makeId: make.id)).ToList();
                         if (getMake.Count > 0)
-                            continue;
-
-                        await _productService.InsertMakeAsync(new Make
+                            entityMake = getMake.FirstOrDefault();
+                        else
                         {
-                            CreatedOn = DateTime.Now,
-                            Deleted = false,
-                            Name = make.value,
-                            MakeId = make.id,
-                            YearId = year.id
-                        });
+                            entityMake.CreatedOn = DateTime.Now;
+                            entityMake.Deleted = false;
+                            entityMake.Name = make.value;
+                            entityMake.MakeId = make.id;
+                            entityMake.YearId = entityYear.Id;
+                            await _productService.InsertMakeAsync(entityMake);
+                        }
 
                         //Get And Insert Model
                         var models = await GetItem<List<ModelModel>>($"https://peds.buyparts.biz/api/ymme/models?makeId=" + make.id + "&yearId=" + year.id, null, HttpMethod.Get, token);
                         foreach (var model in models)
                         {
+                            var entityModel = new Core.Domain.Catalog.Model();
                             var getModel = (await _productService.GetAllModelsAsync(modelId: model.id)).ToList();
                             if (getModel.Count > 0)
-                                continue;
-
-                            await _productService.InsertModelAsync(new Nop.Core.Domain.Catalog.Model
+                                entityModel = getModel.FirstOrDefault();
+                            else
                             {
-                                CreatedOn = DateTime.Now,
-                                Deleted = false,
-                                Name = model.value,
-                                ModelId = model.id,
-                                MakeId = make.id,
-                                YearId = year.id,
-                            });
+                                entityModel.CreatedOn = DateTime.Now;
+                                entityModel.Deleted = false;
+                                entityModel.Name = model.value;
+                                entityModel.ModelId = model.id;
+                                entityModel.MakeId = entityMake.Id;
+                                entityModel.YearId = entityYear.Id;
+                                await _productService.InsertModelAsync(entityModel);
+                            }
 
                             //Get And Insert Engine
                             var engines = await GetItem<List<EngineModel>>($"https://peds.buyparts.biz/api/ymme/engines?makeId=" + make.id + "&modelId=" + model.id + "&yearId=" + year.id, null, HttpMethod.Get, token);
                             foreach (var engine in engines)
                             {
-                                var getEngine = (await _productService.GetAllEnginesAsync(engineId: model.id)).ToList();
-                                if (getEngine.Count > 0)
-                                    continue;
-
-                                await _productService.InsertEngineAsync(new Engine
+                                var getEngine = (await _productService.GetAllEnginesAsync(engineId: engine.id)).ToList();
+                                if (getEngine.Count == 0)
                                 {
-                                    CreatedOn = DateTime.Now,
-                                    Deleted = false,
-                                    Name = engine.value,
-                                    MakeId = make.id,
-                                    YearId = year.id,
-                                    EngineId = model.id
-                                });
+                                    await _productService.InsertEngineAsync(new Engine
+                                    {
+                                        CreatedOn = DateTime.Now,
+                                        Deleted = false,
+                                        Name = engine.value,
+                                        MakeId = entityMake.Id,
+                                        YearId = entityYear.Id,
+                                        ModelId = entityModel.Id,
+                                        EngineId = engine.id,
+                                    });
+                                }
                             }
                         }
                     }
@@ -259,6 +267,10 @@ namespace Nop.Services.Common
                             PageSize = 6
                         };
                         await _categoryService.InsertCategoryAsync(newCategory);
+
+                        //search engine name
+                        var seName = await _urlRecordService.ValidateSeNameAsync(newCategory, newCategory.Name, newCategory.Name, true);
+                        await _urlRecordService.SaveSlugAsync(newCategory, seName, 0);
 
                         // Get And Insert Part Groups
                         foreach (var group in category.partGroups)

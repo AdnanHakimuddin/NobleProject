@@ -16,6 +16,8 @@ namespace Nop.Web.Models.Catalog
             AvailableMakes = new List<SelectListItem>();
             AvailableModels = new List<SelectListItem>();
             AvailableEngine = new List<SelectListItem>();
+            AvailablePartGroups = new List<SelectListItem>();
+            AvailablePartTypes = new List<SelectListItem>();
             CatalogProductsModel = new CatalogProductsModel();
         }
 
@@ -75,6 +77,12 @@ namespace Nop.Web.Models.Catalog
         [NopResourceDisplayName("Search.Engine")]
         public int eid { get; set; }
         
+        [NopResourceDisplayName("Search.PartGroup")]
+        public int pgid { get; set; }
+        
+        [NopResourceDisplayName("Search.PartType")]
+        public int ptid { get; set; }
+        
         [NopResourceDisplayName("Search.VIN")]
         public string vin { get; set; }
 
@@ -88,6 +96,8 @@ namespace Nop.Web.Models.Catalog
         public IList<SelectListItem> AvailableMakes { get; set; }
         public IList<SelectListItem> AvailableModels { get; set; }
         public IList<SelectListItem> AvailableEngine { get; set; }
+        public IList<SelectListItem> AvailablePartGroups { get; set; }
+        public IList<SelectListItem> AvailablePartTypes { get; set; }
 
         #region Nested classes
 

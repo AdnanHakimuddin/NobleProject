@@ -317,7 +317,7 @@ namespace Nop.Services.Catalog
 
          Task UpdatePartTypeAsync(Core.Domain.Catalog.PartType partType);
 
-         Task<IPagedList<Core.Domain.Catalog.PartType>> GetAllPartTypesAsync(string name = null,
+         Task<IPagedList<Core.Domain.Catalog.PartType>> GetAllPartTypesAsync(string name = null, int partGroupId = 0,
             string apiPartTypeId = null,int pageIndex = 0, int pageSize = int.MaxValue);
 
         #endregion

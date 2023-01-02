@@ -875,7 +875,7 @@ namespace Nop.Services.Catalog
             await _partTypeRepository.UpdateAsync(partType);
         }
 
-        public virtual async Task<IPagedList<Core.Domain.Catalog.PartType>> GetAllPartTypesAsync(string name = null,
+        public virtual async Task<IPagedList<Core.Domain.Catalog.PartType>> GetAllPartTypesAsync(string name = null, int partGroupId = 0,
             string apiPartTypeId = null, int pageIndex = 0, int pageSize = int.MaxValue)
         {
             var query = from y in _partTypeRepository.Table

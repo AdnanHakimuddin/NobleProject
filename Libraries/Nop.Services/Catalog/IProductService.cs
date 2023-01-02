@@ -944,7 +944,7 @@ namespace Nop.Services.Catalog
         Task<Make> GetMakeByIdAsync(int makeId);
         Task InsertMakeAsync(Make make);
         Task UpdateMakeAsync(Make make);
-        Task<IPagedList<Make>> GetAllMakesAsync(string name = null, int makeId = 0,
+        Task<IPagedList<Make>> GetAllMakesAsync(string name = null, int makeId = 0, int yearId = 0,
           int pageIndex = 0, int pageSize = int.MaxValue);
         #endregion
 
@@ -954,7 +954,7 @@ namespace Nop.Services.Catalog
         Task<Model> GetModelByIdAsync(int modelId);
         Task InsertModelAsync(Model model);
         Task UpdateModelAsync(Model model);
-        Task<IPagedList<Model>> GetAllModelsAsync(string name = null, int modelId = 0,
+        Task<IPagedList<Model>> GetAllModelsAsync(string name = null, int modelId = 0, int yearId = 0, int makeId = 0,
           int pageIndex = 0, int pageSize = int.MaxValue);
 
         #endregion
@@ -966,7 +966,7 @@ namespace Nop.Services.Catalog
         Task InsertEngineAsync(Engine engine);
         Task UpdateEngineAsync(Engine engine);
 
-        Task<IPagedList<Engine>> GetAllEnginesAsync(string name = null, int engineId = 0,
+        Task<IPagedList<Engine>> GetAllEnginesAsync(string name = null, int engineId = 0, int yearId = 0, int makeId = 0, int modelId = 0,
           int pageIndex = 0, int pageSize = int.MaxValue);
 
         #endregion
