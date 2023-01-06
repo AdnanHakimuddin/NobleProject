@@ -170,12 +170,17 @@ namespace Nop.Services.Common
             {
                 var token = await GetToken();
 
+                var allYears = await _productService.GetAllYearsAsync();
+                var allMakes = await _productService.GetAllMakesAsync();
+                var allModels = await _productService.GetAllModelsAsync();
+                var allEngines = await _productService.GetAllEnginesAsync();
+
                 //Get And Insert Years
                 var years = await GetItem<List<YearApiModel>>($"https://peds.buyparts.biz/api/ymme/years", null, HttpMethod.Get, token);
                 foreach (var year in years)
                 {
                     var entityYear = new Core.Domain.Catalog.Year();
-                    var getYear = (await _productService.GetAllYearsAsync(yearId: year.id)).ToList();
+                    var getYear = allYears.Where(x => x.YearId == year.id).ToList();
                     if (getYear.Count > 0)
                         entityYear = getYear.FirstOrDefault();
                     else
@@ -192,7 +197,7 @@ namespace Nop.Services.Common
                     foreach (var make in makes)
                     {
                         var entityMake = new Make();
-                        var getMake = (await _productService.GetAllMakesAsync(makeId: make.id)).ToList();
+                        var getMake = allMakes.Where(x => x.MakeId == make.id).ToList();
                         if (getMake.Count > 0)
                             entityMake = getMake.FirstOrDefault();
                         else
@@ -210,7 +215,7 @@ namespace Nop.Services.Common
                         foreach (var model in models)
                         {
                             var entityModel = new Core.Domain.Catalog.Model();
-                            var getModel = (await _productService.GetAllModelsAsync(modelId: model.id)).ToList();
+                            var getModel = allModels.Where(x => x.ModelId == model.id).ToList();
                             if (getModel.Count > 0)
                                 entityModel = getModel.FirstOrDefault();
                             else
@@ -228,7 +233,7 @@ namespace Nop.Services.Common
                             var engines = await GetItem<List<EngineApiModel>>($"https://peds.buyparts.biz/api/ymme/engines?makeId=" + make.id + "&modelId=" + model.id + "&yearId=" + year.id, null, HttpMethod.Get, token);
                             foreach (var engine in engines)
                             {
-                                var getEngine = (await _productService.GetAllEnginesAsync(engineId: engine.id)).ToList();
+                                var getEngine = allEngines.Where(x => x.EngineId == engine.id).ToList();
                                 if (getEngine.Count == 0)
                                 {
                                     await _productService.InsertEngineAsync(new Engine

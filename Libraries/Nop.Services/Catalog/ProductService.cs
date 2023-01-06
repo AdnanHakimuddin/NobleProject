@@ -2715,6 +2715,11 @@ namespace Nop.Services.Catalog
             await _yearRepository.UpdateAsync(year);
         }
 
+        public virtual async Task<Year> GetYearByApiYearIdAsync(int yearId)
+        {
+            return await _yearRepository.Table.Where(x => x.YearId == yearId).FirstOrDefaultAsync();
+        }
+
         public virtual async Task<IPagedList<Year>> GetAllYearsAsync(string name = null, int yearId = 0,
             int pageIndex = 0, int pageSize = int.MaxValue)
         {
@@ -2754,6 +2759,11 @@ namespace Nop.Services.Catalog
             await _makeRepository.UpdateAsync(make);
         }
 
+        public virtual async Task<Make> GetMakeByApiMakeIdAsync(int makeId)
+        {
+            return await _makeRepository.Table.Where(x => x.MakeId == makeId).FirstOrDefaultAsync();
+        }
+
         public virtual async Task<IPagedList<Make>> GetAllMakesAsync(string name = null, int makeId = 0, int yearId = 0,
             int pageIndex = 0, int pageSize = int.MaxValue)
         {
@@ -2763,6 +2773,9 @@ namespace Nop.Services.Catalog
             if (!string.IsNullOrWhiteSpace(name))
                 query = query.Where(Y => Y.Name.Contains(name));
 
+            if (yearId > 0)
+                query = query.Where(Y => Y.YearId == yearId);
+            
             if (makeId > 0)
                 query = query.Where(Y => Y.MakeId == makeId);
 
@@ -2793,6 +2806,11 @@ namespace Nop.Services.Catalog
             await _modelRepository.UpdateAsync(model);
         }
 
+        public virtual async Task<Model> GetModelByApiModelIdAsync(int modelId)
+        {
+            return await _modelRepository.Table.Where(x => x.ModelId == modelId).FirstOrDefaultAsync();
+        }
+
         public virtual async Task<IPagedList<Model>> GetAllModelsAsync(string name = null, int modelId = 0, int yearId = 0, int makeId = 0,
             int pageIndex = 0, int pageSize = int.MaxValue)
         {
@@ -2802,8 +2820,11 @@ namespace Nop.Services.Catalog
             if (!string.IsNullOrWhiteSpace(name))
                 query = query.Where(Y => Y.Name .Contains(name));
 
-            if (modelId > 0)
-                query = query.Where(Y => Y.ModelId == modelId);
+            if (yearId > 0)
+                query = query.Where(Y => Y.YearId == yearId);
+            
+            if (makeId > 0)
+                query = query.Where(Y => Y.MakeId == makeId);
 
             return await query.ToPagedListAsync(pageIndex, pageSize);
         }
@@ -2830,6 +2851,11 @@ namespace Nop.Services.Catalog
         public virtual async Task UpdateEngineAsync(Engine engine)
         {
             await _engineRepository.UpdateAsync(engine);
+        }
+
+        public virtual async Task<Engine> GetEngineByApiEngineIdAsync(int engineId)
+        {
+            return await _engineRepository.Table.Where(x => x.EngineId == engineId).FirstOrDefaultAsync();
         }
 
         public virtual async Task<IPagedList<Engine>> GetAllEnginesAsync(string name = null, int engineId = 0, int yearId = 0, int makeId = 0, int modelId = 0,
