@@ -2089,11 +2089,11 @@ namespace Nop.Web.Factories
             model.disableSellerNetwork = false;
             model.disableSpecificConditions = false;
             model.vehicle.specificConditions = new List<object>();
-            model.vehicle.year = yearId;
+            model.vehicle.year = yearId > 0 ? (await _productService.GetYearByIdAsync(yearId)).YearId : yearId;
             model.vehicle.makeTypeId = 1;
-            model.vehicle.make = makeId;
-            model.vehicle.model = modelId;
-            model.vehicle.engine = engineId;
+            model.vehicle.make = makeId > 0 ? (await _productService.GetMakeByIdAsync(makeId)).MakeId : makeId;
+            model.vehicle.model = modelId > 0 ? (await _productService.GetModelByIdAsync(modelId)).ModelId : modelId;
+            model.vehicle.engine = engineId > 0 ? (await _productService.GetEngineByIdAsync(engineId)).EngineId : engineId;
             model.storeId = 1000000537;
             model.storeKey = "XBzDPSlSr8WoBijw";
             model.coverageKey = "640662256";
@@ -2103,6 +2103,7 @@ namespace Nop.Web.Factories
             if (partGroup is not null)
             {
                 var partTypes = await _categoryService.GetAllPartTypesAsync(partGroupId: partGroupId);
+                //model.partTypes = partTypes.Select(x => new PartType { id = x.ApiPartTypeId, groupId = partGroup.ApiPartGroupId, name = x.Name }).ToList();
                 foreach (var item1 in partTypes)
                 {
                     model.partTypes.Add(new PartType
@@ -2111,6 +2112,23 @@ namespace Nop.Web.Factories
                         id = item1.ApiPartTypeId.ToString(),
                         name = item1.Name
                     });
+                }
+            }
+            else
+            {
+                var partGroups = await _categoryService.GetAllPartGroupsAsync();
+                foreach (var allPartGroup in partGroups)
+                {
+                    var partTypes = await _categoryService.GetAllPartTypesAsync(partGroupId: allPartGroup.Id);
+                    foreach (var item1 in partTypes)
+                    {
+                        model.partTypes.Add(new PartType
+                        {
+                            groupId = allPartGroup.ApiPartGroupId,
+                            id = item1.ApiPartTypeId.ToString(),
+                            name = item1.Name
+                        });
+                    }
                 }
             }
 
@@ -2129,31 +2147,30 @@ namespace Nop.Web.Factories
                 }
             }
 
-            //var client = new HttpClient();
-            //client.DefaultRequestHeaders.Clear();
-            //client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-            //client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
-            //client.DefaultRequestHeaders.Add("X-AUTH-TOKEN", token);
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
+            client.DefaultRequestHeaders.Add("X-AUTH-TOKEN", token);
 
-            //string message = JsonConvert.SerializeObject(model);
-            //byte[] messageBytes = System.Text.Encoding.UTF8.GetBytes(message);
-            //var content = new ByteArrayContent(messageBytes);
-            //content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            string message = JsonConvert.SerializeObject(model);
+            byte[] messageBytes = System.Text.Encoding.UTF8.GetBytes(message);
+            var content = new ByteArrayContent(messageBytes);
+            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
-            if (yearId > 0 || makeId > 0 || modelId > 0 || engineId > 0 || partGroupId > 0 || partTypeId > 0)
-            {
-                var postData = await GetItem(_catalogSettings.ApiUrl + "/pti/part-types-search-inquiry?include-specs=false", model, HttpMethod.Post, token);
-            }
-            //var dataValues = await response.Content.ReadAsStringAsync();
-            //var data = JsonConvert.DeserializeObject<ProductDataModel>(dataValues);
-            //return data;
-            //var response = client.PostAsync(_catalogSettings.ApiUrl+"/pti/part-types-search-inquiry?include-specs=false", content).Result;
-            //if (response.IsSuccessStatusCode)
+            //if (yearId > 0 || makeId > 0 || modelId > 0 || engineId > 0 || partGroupId > 0 || partTypeId > 0)
             //{
-            //    var dataValues = await response.Content.ReadAsStringAsync();
-            //    var data = JsonConvert.DeserializeObject<ProductDataModel>(dataValues);
+                var postData = await GetItem(_catalogSettings.ApiUrl + "/pti/part-types-search-inquiry?include-specs=false", model, HttpMethod.Post, token);
+            //    var data = JsonConvert.DeserializeObject<ProductDataModel>(postData);
             //    return data;
             //}
+            var response = client.PostAsync(_catalogSettings.ApiUrl + "/pti/part-types-search-inquiry?include-specs=false", content).Result;
+            if (response.IsSuccessStatusCode)
+            {
+                var dataValues = await response.Content.ReadAsStringAsync();
+                var data = JsonConvert.DeserializeObject<ProductDataModel>(dataValues);
+                return data;
+            }
 
             return new ProductDataModel();
         }

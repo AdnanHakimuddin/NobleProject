@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 
 namespace Nop.Services.Common
 {
-    public partial class CustomTask : IScheduleTask
+    public partial class YMMETask : IScheduleTask
     {
         #region Fields
 
@@ -33,7 +33,7 @@ namespace Nop.Services.Common
 
         #region Ctor
 
-        public CustomTask(ILogger logger,
+        public YMMETask(ILogger logger,
             INopDataProvider nopDataProvider,
             IProductService productService,
             ICategoryService categoryService,
@@ -180,9 +180,9 @@ namespace Nop.Services.Common
                 foreach (var year in years)
                 {
                     var entityYear = new Core.Domain.Catalog.Year();
-                    var getYear = allYears.Where(x => x.YearId == year.id).ToList();
-                    if (getYear.Count > 0)
-                        entityYear = getYear.FirstOrDefault();
+                    var getYear = await _productService.GetYearByApiYearIdAsync(year.id);
+                    if (getYear is not null)
+                        entityYear = getYear;
                     else
                     {
                         entityYear.CreatedOn = DateTime.Now;
@@ -197,9 +197,9 @@ namespace Nop.Services.Common
                     foreach (var make in makes)
                     {
                         var entityMake = new Make();
-                        var getMake = allMakes.Where(x => x.MakeId == make.id).ToList();
-                        if (getMake.Count > 0)
-                            entityMake = getMake.FirstOrDefault();
+                        var getMake = await _productService.GetMakeByApiMakeIdAsync(make.id);
+                        if (getMake is not null)
+                            entityMake = getMake;
                         else
                         {
                             entityMake.CreatedOn = DateTime.Now;
@@ -215,9 +215,9 @@ namespace Nop.Services.Common
                         foreach (var model in models)
                         {
                             var entityModel = new Core.Domain.Catalog.Model();
-                            var getModel = allModels.Where(x => x.ModelId == model.id).ToList();
-                            if (getModel.Count > 0)
-                                entityModel = getModel.FirstOrDefault();
+                            var getModel = await _productService.GetModelByApiModelIdAsync(model.id);
+                            if (getModel is not null)
+                                entityModel = getModel;
                             else
                             {
                                 entityModel.CreatedOn = DateTime.Now;
@@ -233,8 +233,8 @@ namespace Nop.Services.Common
                             var engines = await GetItem<List<EngineApiModel>>($"https://peds.buyparts.biz/api/ymme/engines?makeId=" + make.id + "&modelId=" + model.id + "&yearId=" + year.id, null, HttpMethod.Get, token);
                             foreach (var engine in engines)
                             {
-                                var getEngine = allEngines.Where(x => x.EngineId == engine.id).ToList();
-                                if (getEngine.Count == 0)
+                                var getEngine = await _productService.GetEngineByApiEngineIdAsync(engine.id);
+                                if (getEngine is null)
                                 {
                                     await _productService.InsertEngineAsync(new Engine
                                     {
@@ -246,142 +246,6 @@ namespace Nop.Services.Common
                                         ModelId = entityModel.Id,
                                         EngineId = engine.id,
                                     });
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Get And Insert Categories
-                var categorys = await GetItem<List<ApiCategory>>($"https://peds.buyparts.biz/api/pti/all-part-categories/en?countryId=2", null, HttpMethod.Get, token);
-                foreach (var category in categorys)
-                {
-                    var getCategory = await _categoryService.GetCategoryByCategoryApiIdAsync(category.id);
-                    if (getCategory is null)
-                    {
-                        var newCategory = new Category
-                        {
-                            CreatedOnUtc = DateTime.UtcNow,
-                            Deleted = false,
-                            Name = category.name,
-                            ApiCategoryId = category.id,
-                            UpdatedOnUtc = DateTime.UtcNow,
-                            Published = true,
-                            CategoryTemplateId = 1,
-                            PageSizeOptions = "6, 3, 9",
-                            PageSize = 6
-                        };
-                        await _categoryService.InsertCategoryAsync(newCategory);
-
-                        //search engine name
-                        var seName = await _urlRecordService.ValidateSeNameAsync(newCategory, newCategory.Name, newCategory.Name, true);
-                        await _urlRecordService.SaveSlugAsync(newCategory, seName, 0);
-
-                        // Get And Insert Part Groups
-                        foreach (var group in category.partGroups)
-                        {
-                            var getGroup = await _categoryService.GetAllPartGroupsAsync(apiPartGroupId: group.id);
-                            if (getGroup.Count > 0)
-                                continue;
-
-                            var partGroup = new Core.Domain.Catalog.PartGroup
-                            {
-                                CreatedOn = DateTime.UtcNow,
-                                Deleted = false,
-                                Name = group.name,
-                                EngineCode = group.engineCode,
-                                ApiPartGroupId = group.id,
-                            };
-                            await _categoryService.InsertPartGroupAsync(partGroup);
-
-                            //Insert Category part group
-                            await _categoryService.InsertCategoryPartGroupAsync(new CategoryPartGroup
-                            {
-                                CategoryId = newCategory.Id,
-                                PartGroupId = partGroup.Id
-                            });
-
-                            // Get And Insert Part Types
-                            foreach (var type in group.partTypes)
-                            {
-                                var getType = await _categoryService.GetAllPartTypesAsync(apiPartTypeId: type.id);
-                                if (getType.Count > 0)
-                                    continue;
-
-                                var partType = new Core.Domain.Catalog.PartType
-                                {
-                                    CreatedOn = DateTime.UtcNow,
-                                    Deleted = false,
-                                    Name = type.name,
-                                    ApiPartTypeId = type.id,
-                                    GroupId = partGroup.Id
-                                };
-                                await _categoryService.InsertPartTypeAsync(partType);
-                            }
-                        }
-
-                    }
-                    else
-                    {
-                        // Get And Insert Part Groups
-                        foreach (var group in category.partGroups)
-                        {
-                            var getGroup = await _categoryService.GetAllPartGroupsAsync(apiPartGroupId: group.id);
-                            if (getGroup.Count == 0)
-                            {
-                                var partGroup = new Core.Domain.Catalog.PartGroup
-                                {
-                                    CreatedOn = DateTime.UtcNow,
-                                    Deleted = false,
-                                    Name = group.name,
-                                    EngineCode = group.engineCode,
-                                    ApiPartGroupId = group.id,
-                                };
-                                await _categoryService.InsertPartGroupAsync(partGroup);
-
-                                //Insert Category part group
-                                await _categoryService.InsertCategoryPartGroupAsync(new CategoryPartGroup
-                                {
-                                    CategoryId = getCategory.Id,
-                                    PartGroupId = partGroup.Id
-                                });
-
-                                // Get And Insert Part Types
-                                foreach (var type in group.partTypes)
-                                {
-                                    var getType = await _categoryService.GetAllPartTypesAsync(apiPartTypeId: type.id);
-                                    if (getType.Count > 0)
-                                        continue;
-
-                                    var partType = new Core.Domain.Catalog.PartType
-                                    {
-                                        CreatedOn = DateTime.UtcNow,
-                                        Deleted = false,
-                                        Name = type.name,
-                                        ApiPartTypeId = type.id,
-                                        GroupId = partGroup.Id
-                                    };
-                                    await _categoryService.InsertPartTypeAsync(partType);
-                                }
-                            }
-                            else
-                            {
-                                // Get And Insert Part Types
-                                foreach (var type in group.partTypes)
-                                {
-                                    var getType = await _categoryService.GetAllPartTypesAsync(apiPartTypeId: type.id);
-                                    if (getType.Count > 0)
-                                        continue;
-
-                                    var partType = new Core.Domain.Catalog.PartType
-                                    {
-                                        CreatedOn = DateTime.UtcNow,
-                                        Deleted = false,
-                                        Name = type.name,
-                                        ApiPartTypeId = type.id,
-                                        GroupId = getGroup.FirstOrDefault().Id
-                                    };
-                                    await _categoryService.InsertPartTypeAsync(partType);
                                 }
                             }
                         }
@@ -421,25 +285,5 @@ namespace Nop.Services.Common
     {
         public int id { get; set; }
         public string value { get; set; }
-    }
-    public class PartType
-    {
-        public string id { get; set; }
-        public string name { get; set; }
-        public string groupId { get; set; }
-    }
-    public class PartGroupApiModel
-    {
-        public string id { get; set; }
-        public string name { get; set; }
-        public string engineCode { get; set; }
-        public List<PartType> partTypes { get; set; }
-    }
-
-    public class ApiCategory
-    {
-        public string id { get; set; }
-        public string name { get; set; }
-        public List<PartGroupApiModel> partGroups { get; set; }
     }
 }
