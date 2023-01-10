@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -2067,7 +2068,8 @@ namespace Nop.Web.Factories
                 var errors = errorMessage.Split(",");
                 var error = errors[2].Split(":");
                 var finalError = error[1];
-                productModel.ErrorMessage = finalError.Replace("@\"[^0-9a-zA-Z]+\"", "");
+                Regex reg = new Regex("[*'\";,_&#^@}]");
+                productModel.ErrorMessage = reg.Replace(finalError, string.Empty);
             }
 
             return productModel;
