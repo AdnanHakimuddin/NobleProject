@@ -934,6 +934,7 @@ namespace Nop.Services.Catalog
         Task<Year> GetYearByIdAsync(int yearId);
         Task InsertYearAsync(Year year);
         Task UpdateYearAsync(Year year);
+        Task<Year> GetYearByApiYearIdAsync(int yearId);
         Task<IPagedList<Year>> GetAllYearsAsync(string name = null, int yearId = 0,
           int pageIndex = 0, int pageSize = int.MaxValue);
         #endregion
@@ -944,6 +945,7 @@ namespace Nop.Services.Catalog
         Task<Make> GetMakeByIdAsync(int makeId);
         Task InsertMakeAsync(Make make);
         Task UpdateMakeAsync(Make make);
+        Task<Make> GetMakeByApiMakeIdAsync(int makeId);
         Task<IPagedList<Make>> GetAllMakesAsync(string name = null, int makeId = 0, int yearId = 0,
           int pageIndex = 0, int pageSize = int.MaxValue);
         #endregion
@@ -954,6 +956,7 @@ namespace Nop.Services.Catalog
         Task<Model> GetModelByIdAsync(int modelId);
         Task InsertModelAsync(Model model);
         Task UpdateModelAsync(Model model);
+        Task<Model> GetModelByApiModelIdAsync(int modelId);
         Task<IPagedList<Model>> GetAllModelsAsync(string name = null, int modelId = 0, int yearId = 0, int makeId = 0,
           int pageIndex = 0, int pageSize = int.MaxValue);
 
@@ -965,7 +968,7 @@ namespace Nop.Services.Catalog
         Task<Engine> GetEngineByIdAsync(int engineId);
         Task InsertEngineAsync(Engine engine);
         Task UpdateEngineAsync(Engine engine);
-
+        Task<Engine> GetEngineByApiEngineIdAsync(int engineId);
         Task<IPagedList<Engine>> GetAllEnginesAsync(string name = null, int engineId = 0, int yearId = 0, int makeId = 0, int modelId = 0,
           int pageIndex = 0, int pageSize = int.MaxValue);
 

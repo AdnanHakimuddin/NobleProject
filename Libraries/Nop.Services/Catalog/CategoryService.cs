@@ -894,6 +894,9 @@ namespace Nop.Services.Catalog
 
             if (!string.IsNullOrWhiteSpace(apiPartTypeId))
                 query = query.Where(Y => Y.ApiPartTypeId == apiPartTypeId);
+            
+            if (partGroupId > 0)
+                query = query.Where(Y => Y.GroupId == partGroupId);
 
             return await query.ToPagedListAsync(pageIndex, pageSize);
         }

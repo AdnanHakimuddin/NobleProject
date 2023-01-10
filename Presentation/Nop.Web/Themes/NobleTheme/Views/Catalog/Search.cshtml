@@ -90,6 +90,30 @@
                 }
             });
         });
+        $("#@Html.IdFor(model => model.pgid)").change(function() {
+             var engineData = {
+                "partGroupId": $("#pgid").val(),
+            };
+            var partTypes = $("#@Html.IdFor(model => model.ptid)");
+            $.ajax({
+                cache: false,
+                type: "GET",
+                url: "@Url.Action("GetPartTypes", "Catalog")",,
+                data: engineData,
+                success: function(data, textStatus, jqXHR) {
+                    if (data.success) {
+                        partTypes.html('');
+                        $.each(data.list,
+                            function(id, option) {
+                                partTypes.append($('<option></option>').val(option.Value).html(option.Text));
+                            });
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    $("#statesAlert").click();
+                }
+            });
+        });
 
     });
     function toggleAdvancedSearch() {
@@ -147,13 +171,13 @@
                         <div class="form-group">
                             <label class="control-label col-sm-3 col-md-2" asp-for="eid">@T("Search.PartGroup"):</label>
                             <div class="col-sm-5 col-md-5">
-                                <select class="form-control dropdown-toggle category-iteam category-select" asp-for="eid" asp-items="Model.AvailablePartGroups"></select>
+                                <select class="form-control dropdown-toggle category-iteam category-select" asp-for="pgid" asp-items="Model.AvailablePartGroups"></select>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="control-label col-sm-3 col-md-2" asp-for="eid">@T("Search.PartType"):</label>
                             <div class="col-sm-5 col-md-5">
-                                <select class="form-control dropdown-toggle category-iteam category-select" asp-for="eid" asp-items="Model.AvailablePartTypes"></select>
+                                <select class="form-control dropdown-toggle category-iteam category-select" asp-for="ptid" asp-items="Model.AvailablePartTypes"></select>
                             </div>
                         </div>
                         <div class="form-group">

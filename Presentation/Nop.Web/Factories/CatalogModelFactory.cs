@@ -155,6 +155,93 @@ namespace Nop.Web.Factories
 
         #region Utilities
 
+        public async Task<HttpResponseMessage> HttpRequestAsync<T>(string url, HttpMethod httpMethod, string token, T item = default(T))
+        {
+            var uri = new Uri($"{url}");
+
+            HttpResponseMessage response = null;
+            using (var handler = new HttpClientHandler())
+            {
+
+                using (HttpClient httpClient = new HttpClient(handler))
+                {
+                    httpClient.DefaultRequestHeaders.Accept.Clear();
+
+                    HttpContent httpContent = null;
+
+                    if (token != null) { httpClient.DefaultRequestHeaders.Add("X-AUTH-TOKEN", token);/* = new AuthenticationHeaderValue("Authorization", "Bearer " + token);*/ }
+
+                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    var stringfiedJson = "";
+                    if (item != null)
+                    {
+                        stringfiedJson = JsonConvert.SerializeObject(item);
+                        //await _logger.InsertLogAsync(Core.Domain.Logging.LogLevel.Debug, "Json Log", stringfiedJson);
+                    }
+                    httpContent = new StringContent(stringfiedJson, Encoding.UTF8, "application/json");
+                    try
+                    {
+                        switch (httpMethod)
+                        {
+                            case HttpMethod.Get:
+                                response = await httpClient.GetAsync(uri);
+                                break;
+                            case HttpMethod.Post:
+                                response = await httpClient.PostAsync(uri, httpContent);
+                                break;
+                            case HttpMethod.Put:
+                                response = await httpClient.PutAsync(uri, httpContent);
+                                break;
+                            case HttpMethod.Delete:
+                                response = await httpClient.DeleteAsync(uri);
+                                break;
+                        }
+
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            throw new Exception($@"Http request failure {response.StatusCode} {uri} {httpMethod.ToString()}");
+                        }
+                        return response;
+                    }
+                    catch (Exception ex)
+                    {
+                        //HttpResponseMessage response = null;
+                        //await _logger.InsertLogAsync(Core.Domain.Logging.LogLevel.Debug, "Exception Error :: ", ex.Message);
+                        return response;
+                    }
+                }
+            }
+        }
+
+        public enum HttpMethod
+        {
+            Get, Post, Put, Delete, Patch
+        }
+
+        public async Task<T> GetItem<T>(string url, T model, HttpMethod type = HttpMethod.Get, string token = "")
+        {
+            HttpResponseMessage httpResponseMessage;
+            try
+            {
+                httpResponseMessage = await HttpRequestAsync<T>(url, type, token, model);
+
+                if (httpResponseMessage.IsSuccessStatusCode)
+                {
+                    var content = await httpResponseMessage.Content.ReadAsStringAsync();
+                    var Item = JsonConvert.DeserializeObject<T>(content);
+                    return Item;
+                }
+
+            }
+            catch (Exception x)
+            {
+                //await _logger.InsertLogAsync(Core.Domain.Logging.LogLevel.Debug, "Inside getItem", x.Message);
+                return model;
+            }
+            throw new Exception(httpResponseMessage.ReasonPhrase);
+        }
+
+
         protected virtual CategorySimpleModel GetCategorySimpleModel(XElement elem)
         {
             var urlHelper = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
@@ -2003,11 +2090,11 @@ namespace Nop.Web.Factories
             model.disableSellerNetwork = false;
             model.disableSpecificConditions = false;
             model.vehicle.specificConditions = new List<object>();
-            model.vehicle.year = yearId;
+            model.vehicle.year = yearId > 0 ? (await _productService.GetYearByIdAsync(yearId)).YearId : yearId;
             model.vehicle.makeTypeId = 1;
-            model.vehicle.make = makeId;
-            model.vehicle.model = modelId;
-            model.vehicle.engine = engineId;
+            model.vehicle.make = makeId > 0 ? (await _productService.GetMakeByIdAsync(makeId)).MakeId : makeId;
+            model.vehicle.model = modelId > 0 ? (await _productService.GetModelByIdAsync(modelId)).ModelId : modelId;
+            model.vehicle.engine = engineId > 0 ? (await _productService.GetEngineByIdAsync(engineId)).EngineId : engineId;
             model.storeId = 1000000537;
             model.storeKey = "XBzDPSlSr8WoBijw";
             model.coverageKey = "640662256";
@@ -2017,6 +2104,7 @@ namespace Nop.Web.Factories
             if (partGroup is not null)
             {
                 var partTypes = await _categoryService.GetAllPartTypesAsync(partGroupId: partGroupId);
+                //model.partTypes = partTypes.Select(x => new PartType { id = x.ApiPartTypeId, groupId = partGroup.ApiPartGroupId, name = x.Name }).ToList();
                 foreach (var item1 in partTypes)
                 {
                     model.partTypes.Add(new PartType
@@ -2027,12 +2115,30 @@ namespace Nop.Web.Factories
                     });
                 }
             }
+            else
+            {
+                var partGroups = await _categoryService.GetAllPartGroupsAsync();
+                foreach (var allPartGroup in partGroups)
+                {
+                    var partTypes = await _categoryService.GetAllPartTypesAsync(partGroupId: allPartGroup.Id);
+                    foreach (var item1 in partTypes)
+                    {
+                        model.partTypes.Add(new PartType
+                        {
+                            groupId = allPartGroup.ApiPartGroupId,
+                            id = item1.ApiPartTypeId.ToString(),
+                            name = item1.Name
+                        });
+                    }
+                }
+            }
 
             if (partTypeId > 0)
             {
                 var partType = await _categoryService.GetPartTypeByIdAsync(partTypeId);
                 if (partType is not null)
                 {
+                    model.partTypes = new List<PartType>();
                     model.partTypes.Add(new PartType
                     {
                         groupId = partGroup.ApiPartGroupId,
@@ -2053,8 +2159,12 @@ namespace Nop.Web.Factories
             var content = new ByteArrayContent(messageBytes);
             content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
-            var productModel = new ProductDataModel();
-
+            //if (yearId > 0 || makeId > 0 || modelId > 0 || engineId > 0 || partGroupId > 0 || partTypeId > 0)
+            //{
+                var postData = await GetItem(_catalogSettings.ApiUrl + "/pti/part-types-search-inquiry?include-specs=false", model, HttpMethod.Post, token);
+            //    var data = JsonConvert.DeserializeObject<ProductDataModel>(postData);
+            //    return data;
+            //}
             var response = client.PostAsync(_catalogSettings.ApiUrl + "/pti/part-types-search-inquiry?include-specs=false", content).Result;
             if (response.IsSuccessStatusCode)
             {
