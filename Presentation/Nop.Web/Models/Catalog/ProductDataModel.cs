@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using Nop.Core.Domain.Catalog;
 using Nop.Web.Framework.Models;
 using Nop.Web.Models.Media;
@@ -11,6 +12,9 @@ namespace Nop.Web.Models.Catalog
         public string operationId { get; set; }
         public Vehicle vehicle { get; set; }
         public Inquiryresponse inquiryResponse { get; set; }
+
+        [JsonIgnore]
+        public string ErrorMessage { get; set; }
 
         public class Vehicle
         {
@@ -64,6 +68,7 @@ namespace Nop.Web.Models.Catalog
             public string catalogOrderNumber { get; set; }
             public Price price { get; set; }
             public string headerText { get; set; }
+
         }
 
         public class Price

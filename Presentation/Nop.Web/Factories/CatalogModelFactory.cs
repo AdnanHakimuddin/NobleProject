@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -2012,7 +2013,7 @@ namespace Nop.Web.Factories
             model.coverageKey = "640662256";
 
 
-            var partGroup = await _categoryService.GetPartGroupByIdAsync(partGroupId);
+            var partGroup = await _categoryService.GetPartGroupByIdAsync(73);
             if (partGroup is not null)
             {
                 var partTypes = await _categoryService.GetAllPartTypesAsync(partGroupId: partGroupId);
@@ -2052,15 +2053,26 @@ namespace Nop.Web.Factories
             var content = new ByteArrayContent(messageBytes);
             content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
-            var response = client.PostAsync(_catalogSettings.ApiUrl+"/pti/part-types-search-inquiry?include-specs=false", content).Result;
+            var productModel = new ProductDataModel();
+
+            var response = client.PostAsync(_catalogSettings.ApiUrl + "/pti/part-types-search-inquiry?include-specs=false", content).Result;
             if (response.IsSuccessStatusCode)
             {
                 var dataValues = await response.Content.ReadAsStringAsync();
                 var data = JsonConvert.DeserializeObject<ProductDataModel>(dataValues);
                 return data;
             }
+            else
+            {
+                var errorMessage = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                var errors = errorMessage.Split(",");
+                var error = errors[2].Split(":");
+                var finalError = error[1];
+                Regex reg = new Regex("[*'\";,_&#^@}]");
+                productModel.ErrorMessage = reg.Replace(finalError, string.Empty);
+            }
 
-            return new ProductDataModel();
+            return productModel;
         }
 
         // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
