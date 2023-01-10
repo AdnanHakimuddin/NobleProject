@@ -2161,16 +2161,17 @@ namespace Nop.Web.Factories
 
             //if (yearId > 0 || makeId > 0 || modelId > 0 || engineId > 0 || partGroupId > 0 || partTypeId > 0)
             //{
-                //var postData = await GetItem(_catalogSettings.ApiUrl + "/pti/part-types-search-inquiry?include-specs=false", model, HttpMethod.Post, token);
+            //var postData = await GetItem(_catalogSettings.ApiUrl + "/pti/part-types-search-inquiry?include-specs=false", model, HttpMethod.Post, token);
             //    var data = JsonConvert.DeserializeObject<ProductDataModel>(postData);
             //    return data;
             //}
+            var productModel = new ProductDataModel();
             var response = client.PostAsync(_catalogSettings.ApiUrl + "/pti/part-types-search-inquiry?include-specs=false", content).Result;
             if (response.IsSuccessStatusCode)
             {
                 var dataValues = await response.Content.ReadAsStringAsync();
-                var data = JsonConvert.DeserializeObject<ProductDataModel>(dataValues);
-                return data;
+                productModel = JsonConvert.DeserializeObject<ProductDataModel>(dataValues);
+                return productModel;
             }
             else
             {
