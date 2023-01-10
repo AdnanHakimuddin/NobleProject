@@ -171,11 +171,6 @@ namespace Nop.Services.Common
             {
                 var token = await GetToken();
 
-                var allYears = await _productService.GetAllYearsAsync();
-                var allMakes = await _productService.GetAllMakesAsync();
-                var allModels = await _productService.GetAllModelsAsync();
-                var allEngines = await _productService.GetAllEnginesAsync();
-
                 //Get And Insert Years
                 var years = await GetItem<List<YearApiModel>>($"https://peds.buyparts.biz/api/ymme/years", null, HttpMethod.Get, token);
                 foreach (var year in years)
