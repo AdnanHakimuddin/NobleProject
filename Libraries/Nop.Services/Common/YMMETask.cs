@@ -145,6 +145,7 @@ namespace Nop.Services.Common
             //    username = "AccelStg",
             //    password = "mS2.wN5!"
             //};
+
             var client = new HttpClient();
             var content = new StringContent(JsonConvert.SerializeObject(new LoginApiModel { username = "AccelStg", password = "mS2.wN5!" }));
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
