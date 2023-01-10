@@ -210,3 +210,15 @@
 /Presentation/Nop.Web/Plugins/ExternalAuth.Facebook/runtimes/win-arm64/native/Microsoft.Data.SqlClient.SNI.dll
 /Presentation/Nop.Web/Plugins/ExternalAuth.Facebook/runtimes/win-arm64/native/libSkiaSharp.dll
 /Presentation/Nop.Web/Plugins
+/Libraries/Nop.Core/bin/Release/net6.0
+/Libraries/Nop.Core/obj/Release/net6.0
+/Libraries/Nop.Data/bin/Release/net6.0
+/Libraries/Nop.Data/obj/Release/net6.0
+/Libraries/Nop.Services/bin/Release/net6.0
+/Libraries/Nop.Services/obj/Release/net6.0
+/Presentation/Nop.Web/bin/Release/net6.0
+/Presentation/Nop.Web/Properties/PublishProfiles
+/Presentation/Nop.Web.Framework/bin/Release/net6.0
+/Presentation/Nop.Web.Framework/obj/Release/net6.0
+*.user
+
