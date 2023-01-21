@@ -35,6 +35,7 @@ using Nop.Web.Framework.Controllers;
 using Nop.Web.Framework.Mvc;
 using Nop.Web.Framework.Mvc.Filters;
 using Nop.Web.Infrastructure.Cache;
+using Nop.Web.Models.Catalog;
 using Nop.Web.Models.Media;
 using Nop.Web.Models.ShoppingCart;
 
@@ -510,19 +511,128 @@ namespace Nop.Web.Controllers
         //add product to cart using AJAX
         //currently we use this method on catalog pages (category/manufacturer/etc)
         [HttpPost]
-        public virtual async Task<IActionResult> AddProductToCart_Catalog(int productId, int shoppingCartTypeId,
+        public virtual async Task<IActionResult> AddProductToCart_Catalog(int apiProductId, int shoppingCartTypeId,
             int quantity, bool forceredirection = false)
         {
             var cartType = (ShoppingCartType)shoppingCartTypeId;
 
-            var product = await _productService.GetProductByIdAsync(productId);
+            var product = (await _productService.SearchProductsAsync(apiProductId: apiProductId)).FirstOrDefault();
             if (product == null)
+            {
+
+                var newSku = !string.IsNullOrWhiteSpace(product.Sku)
+                ? string.Format(await _localizationService.GetResourceAsync("Admin.Catalog.Products.Copy.SKU.New"), product.Sku)
+                : product.Sku;
                 //no product found
-                return Json(new
+                await _productService.InsertProductAsync(new Product
                 {
-                    success = false,
-                    message = "No product found with the specified ID"
+                    ProductTypeId = (int)ProductType.SimpleProduct,
+                    ParentGroupedProductId = 0,
+                    VisibleIndividually = true,
+                    //Name = model.inquiryResponse.parts,
+                    ApiProductId = apiProductId,
+
+                    ShortDescription = product.ShortDescription,
+                    FullDescription = product.FullDescription,
+                    VendorId = 0,
+                    ProductTemplateId = 5,
+                    AdminComment = "",
+                    ShowOnHomepage = false,
+                    MetaKeywords = "",
+                    MetaDescription = "",
+                    MetaTitle = "",
+                    AllowCustomerReviews = false,
+                    LimitedToStores = false,
+                    SubjectToAcl = false,
+                    Sku = newSku,
+                    ManufacturerPartNumber = "",
+                    Gtin = "",
+                    IsGiftCard = false,
+                    GiftCardTypeId = 0,
+                    OverriddenGiftCardAmount = 0,
+                    RequireOtherProducts = false,
+                    RequiredProductIds = "",
+                    AutomaticallyAddRequiredProducts = false,
+                    IsDownload = false,
+                    DownloadId = 0,
+                    UnlimitedDownloads = product.UnlimitedDownloads,
+                    MaxNumberOfDownloads = product.MaxNumberOfDownloads,
+                    DownloadExpirationDays = product.DownloadExpirationDays,
+                    DownloadActivationTypeId = 0,
+                    HasSampleDownload = false,
+                    SampleDownloadId = 0,
+                    HasUserAgreement = false,
+                    UserAgreementText = "",
+                    IsRecurring = false,
+                    RecurringCycleLength = 0,
+                    RecurringCyclePeriodId = 0,
+                    RecurringTotalCycles = 0,
+                    IsRental = false,
+                    RentalPriceLength = 0,
+                    RentalPricePeriod = 0,
+                    IsShipEnabled = true,
+                    IsFreeShipping = false,
+                    ShipSeparately = false,
+                    AdditionalShippingCharge = 0,
+                    DeliveryDateId = 0,
+                    IsTaxExempt = false,
+                    TaxCategoryId = 0,
+                    IsTelecommunicationsOrBroadcastingOrElectronicServices =
+                    false,
+                    ManageInventoryMethodId = 0,
+                    ProductAvailabilityRangeId = 0,
+                    UseMultipleWarehouses = false,
+                    WarehouseId = 0,
+                    StockQuantity = 100,
+                    DisplayStockAvailability = true,
+                    DisplayStockQuantity = false,
+                    MinStockQuantity = 1,
+                    LowStockActivityId = 0,
+                    NotifyAdminForQuantityBelow = 0,
+                    BackorderModeId = 0,
+                    AllowBackInStockSubscriptions = false,
+                    OrderMinimumQuantity = 1,
+                    OrderMaximumQuantity = 100,
+                    AllowedQuantities = "",
+                    AllowAddingOnlyExistingAttributeCombinations = false,
+                    NotReturnable = false,
+                    DisableBuyButton = false,
+                    DisableWishlistButton = false,
+                    AvailableForPreOrder = false,
+                    PreOrderAvailabilityStartDateTimeUtc = null,
+                    CallForPrice = false,
+                    Price = product.Price,
+                    OldPrice = 0,
+                    ProductCost = 0,
+                    CustomerEntersPrice = false,
+                    MinimumCustomerEnteredPrice = 0,
+                    MaximumCustomerEnteredPrice = 0,
+                    BasepriceEnabled = false,
+                    BasepriceAmount = 0,
+                    BasepriceUnitId = 0,
+                    BasepriceBaseAmount = 0,
+                    BasepriceBaseUnitId = 0,
+                    MarkAsNew = true,
+                    MarkAsNewStartDateTimeUtc = null,
+                    MarkAsNewEndDateTimeUtc = null,
+                    Weight = 0,
+                    Length = 0,
+                    Width = 0,
+                    Height = 0,
+                    AvailableStartDateTimeUtc = null,
+                    AvailableEndDateTimeUtc = null,
+                    DisplayOrder = product.DisplayOrder,
+                    Published = true,
+                    Deleted = false,
+                    CreatedOnUtc = DateTime.UtcNow,
+                    UpdatedOnUtc = DateTime.UtcNow
                 });
+            }
+            //return Json(new
+            //    {
+            //        success = false,
+            //        message = "No product found with the specified ID"
+            //    });
 
             //we can add only simple products
             if (product.ProductType != ProductType.SimpleProduct)

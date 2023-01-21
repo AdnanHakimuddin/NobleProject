@@ -157,7 +157,7 @@ namespace Nop.Web.Infrastructure
 
             //add product to cart (without any attributes and options). used on catalog pages. (AJAX)
             endpointRouteBuilder.MapControllerRoute(name: "AddProductToCart-Catalog",
-                pattern: $"addproducttocart/catalog/{{productId:min(0)}}/{{shoppingCartTypeId:min(0)}}/{{quantity:min(0)}}",
+                pattern: $"addproducttocart/catalog/{{apiProductId:min(0)}}/{{shoppingCartTypeId:min(0)}}/{{quantity:min(0)}}",
                 defaults: new { controller = "ShoppingCart", action = "AddProductToCart_Catalog" });
 
             //add product to cart (with attributes and options). used on the product details pages. (AJAX)

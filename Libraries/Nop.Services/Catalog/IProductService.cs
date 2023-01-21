@@ -158,6 +158,7 @@ namespace Nop.Services.Catalog
             IList<int> manufacturerIds = null,
             int storeId = 0,
             int vendorId = 0,
+            int apiProductId = 0,
             int warehouseId = 0,
             ProductType? productType = null,
             bool visibleIndividuallyOnly = false,

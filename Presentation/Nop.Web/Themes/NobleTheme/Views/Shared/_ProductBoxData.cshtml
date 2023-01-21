@@ -7,7 +7,7 @@
 @inject IWorkContext workContext
 @{
     //prepare "Add to cart" AJAX link
-    var addtocartlink = "";
+    //var addtocartlink = "";
     var shoppingCartTypeId = (int)ShoppingCartType.ShoppingCart;
     var quantity = 1;
     //if (Model.ProductPrice.ForceRedirectionAfterAddingToCart)
@@ -51,6 +51,7 @@
             </div>
             <div class="add-info">
                 <div class="buttons">
+                    <button type="button" class="button-2 product-box-add-to-cart-button" onclick="AjaxCart.addproducttocart_catalog('@Url.RouteUrl("AddProductToCart-Catalog", new { apiProductId = Model.id, shoppingCartTypeId = shoppingCartTypeId, quantity = quantity })');return false;">@(T("ShoppingCart.AddToCart").Text)</button>
                     <div class="prices">
                         @if (Model.priceAvailable)
                         {
