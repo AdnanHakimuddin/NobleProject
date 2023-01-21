@@ -68,6 +68,7 @@ namespace Nop.Web.Models.ShoppingCart
 
             public string ProductSeName { get; set; }
 
+            public string ApiImageUrl { get; set; }
             public string UnitPrice { get; set; }
             public decimal UnitPriceValue { get; set; }
 

@@ -511,7 +511,8 @@ namespace Nop.Web.Controllers
         //add product to cart using AJAX
         //currently we use this method on catalog pages (category/manufacturer/etc)
         [HttpPost]
-        public virtual async Task<IActionResult> AddProductToCart_Catalog(int apiProductId, int shoppingCartTypeId,
+        public virtual async Task<IActionResult> AddProductToCart_Catalog(string genericDescription, string catShortDescription, string catLongDescription, string partNumber, int availableQuantity, string displayQuantity, float unitCost, string imageUrl,
+            int apiProductId, int shoppingCartTypeId,
             int quantity, bool forceredirection = false)
         {
             var cartType = (ShoppingCartType)shoppingCartTypeId;
@@ -519,21 +520,21 @@ namespace Nop.Web.Controllers
             var product = (await _productService.SearchProductsAsync(apiProductId: apiProductId)).FirstOrDefault();
             if (product == null)
             {
-
-                var newSku = !string.IsNullOrWhiteSpace(product.Sku)
-                ? string.Format(await _localizationService.GetResourceAsync("Admin.Catalog.Products.Copy.SKU.New"), product.Sku)
-                : product.Sku;
+                //var newSku = !string.IsNullOrWhiteSpace(product.Sku)
+                //? string.Format(await _localizationService.GetResourceAsync("Admin.Catalog.Products.Copy.SKU.New"), product.Sku)
+                //: product.Sku;
                 //no product found
-                await _productService.InsertProductAsync(new Product
+
+                imageUrl = imageUrl.Replace("%2F", "/");
+                product = new Product
                 {
                     ProductTypeId = (int)ProductType.SimpleProduct,
                     ParentGroupedProductId = 0,
                     VisibleIndividually = true,
-                    //Name = model.inquiryResponse.parts,
+                    Name = genericDescription,
                     ApiProductId = apiProductId,
-
-                    ShortDescription = product.ShortDescription,
-                    FullDescription = product.FullDescription,
+                    ShortDescription = catShortDescription,
+                    FullDescription = catLongDescription,
                     VendorId = 0,
                     ProductTemplateId = 5,
                     AdminComment = "",
@@ -544,7 +545,7 @@ namespace Nop.Web.Controllers
                     AllowCustomerReviews = false,
                     LimitedToStores = false,
                     SubjectToAcl = false,
-                    Sku = newSku,
+                    Sku = partNumber,
                     ManufacturerPartNumber = "",
                     Gtin = "",
                     IsGiftCard = false,
@@ -555,9 +556,9 @@ namespace Nop.Web.Controllers
                     AutomaticallyAddRequiredProducts = false,
                     IsDownload = false,
                     DownloadId = 0,
-                    UnlimitedDownloads = product.UnlimitedDownloads,
-                    MaxNumberOfDownloads = product.MaxNumberOfDownloads,
-                    DownloadExpirationDays = product.DownloadExpirationDays,
+                    UnlimitedDownloads = false,
+                    MaxNumberOfDownloads = 0,
+                    DownloadExpirationDays = 0,
                     DownloadActivationTypeId = 0,
                     HasSampleDownload = false,
                     SampleDownloadId = 0,
@@ -583,7 +584,7 @@ namespace Nop.Web.Controllers
                     ProductAvailabilityRangeId = 0,
                     UseMultipleWarehouses = false,
                     WarehouseId = 0,
-                    StockQuantity = 100,
+                    StockQuantity = availableQuantity,
                     DisplayStockAvailability = true,
                     DisplayStockQuantity = false,
                     MinStockQuantity = 1,
@@ -601,7 +602,7 @@ namespace Nop.Web.Controllers
                     AvailableForPreOrder = false,
                     PreOrderAvailabilityStartDateTimeUtc = null,
                     CallForPrice = false,
-                    Price = product.Price,
+                    Price = (decimal)unitCost,
                     OldPrice = 0,
                     ProductCost = 0,
                     CustomerEntersPrice = false,
@@ -621,13 +622,20 @@ namespace Nop.Web.Controllers
                     Height = 0,
                     AvailableStartDateTimeUtc = null,
                     AvailableEndDateTimeUtc = null,
-                    DisplayOrder = product.DisplayOrder,
+                    DisplayOrder = 0,
                     Published = true,
                     Deleted = false,
                     CreatedOnUtc = DateTime.UtcNow,
-                    UpdatedOnUtc = DateTime.UtcNow
-                });
+                    UpdatedOnUtc = DateTime.UtcNow,
+                    ApiImageUrl = imageUrl
+                };
+
+                await _productService.InsertProductAsync(product);
+
+                //search engine name
+                await _urlRecordService.SaveSlugAsync(product, await _urlRecordService.ValidateSeNameAsync(product, string.Empty, product.Name, true), 0);
             }
+
             //return Json(new
             //    {
             //        success = false,

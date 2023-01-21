@@ -99,7 +99,8 @@
                             @if (Model.ShowProductImages)
                             {
                                 <td class="product-picture">
-                                    <img alt="@item.Picture.AlternateText" src="@item.Picture.ImageUrl" title="@item.Picture.Title" />
+                                    @*<img alt="@item.Picture.AlternateText" src="@item.Picture.ImageUrl" title="@item.Picture.Title" />*@
+                                        <img alt="@item.Picture.AlternateText" data-src="@item.ApiImageUrl" src="@item.ApiImageUrl" />
                                 </td>
                             }
                             <td class="product">

@@ -7,7 +7,7 @@
 @inject IWorkContext workContext
 @{
     //prepare "Add to cart" AJAX link
-    //var addtocartlink = "";
+    var addtocartlink = "";
     var shoppingCartTypeId = (int)ShoppingCartType.ShoppingCart;
     var quantity = 1;
     //if (Model.ProductPrice.ForceRedirectionAfterAddingToCart)
@@ -22,49 +22,142 @@
     //var addtowishlistlink = Url.RouteUrl("AddProductToCart-Catalog", new { productId = Model.Id, shoppingCartTypeId = (int)ShoppingCartType.Wishlist, quantity = quantity });
     //var addtocomparelink = Url.RouteUrl("AddProductToCompare", new { productId = Model.Id });
 }
+<link rel="stylesheet" href="~/lib_npm/magnific-popup/magnific-popup.css" />
+<script asp-exclude-from-bundle="true" src="~/lib_npm/magnific-popup/jquery.magnific-popup.min.js" asp-location="Footer"></script>
+<script asp-location="Footer">
+    //jQuery(".product-title").click(function() {
+    //    jQuery.magnificPopup.open({
+    //        items: {
+    //            src: jQuery(this).find('a').attr('link'),
+    //            type: 'iframe',
+    //            disableOn: false
+    //        }
+    //    });
+    //});
+</script>
 
-<div class="product-item clearfix">
-    <div class="picture">
-        @if (string.IsNullOrWhiteSpace(Model.imageUrl))
-        {
-            <img class="lazyOwl" alt="@Model.genericDescription" data-src="@Model.imageUrl" src="http://localhost:65283/images/thumbs/default-image_100.png" title="@Model.genericDescription" />
-        }
-        else
-        {
-            <img class="lazyOwl" alt="@Model.genericDescription" data-src="@Model.imageUrl" src="@Model.imageUrl" title="@Model.genericDescription" />
-        }
-    </div>
-    <div class="caption">
-        <div class="details">
+
+<div class="product-item clearfix" style="margin-bottom:10px">
+    <div class="row" style="margin-top:20px">
+        <div class="col-lg-3">
             <h3 class="product-title">
-                <a href="#">@Model.genericDescription</a>
+                <a link="@Model.c2cUrl" href="@Model.c2cUrl" target="_blank">@Model.genericDescription</a>
             </h3>
             <div class="sku">
                 Manufacturer Name:  @Model.manufacturerName
                 Manufacturer Code:  @Model.manufacturerCode
-                Years:  @Model.years
-            </div>
 
-            <div class="product-border-bottom"></div>
-            <div class="description">
-                @Html.Raw(Model.catLongDescription)
             </div>
-            <div class="add-info">
-                <div class="buttons">
-                    <button type="button" class="button-2 product-box-add-to-cart-button" onclick="AjaxCart.addproducttocart_catalog('@Url.RouteUrl("AddProductToCart-Catalog", new { apiProductId = Model.id, shoppingCartTypeId = shoppingCartTypeId, quantity = quantity })');return false;">@(T("ShoppingCart.AddToCart").Text)</button>
-                    <div class="prices">
-                        @if (Model.priceAvailable)
-                        {
-                            <span class="price actual-price">@Model.price.unitCost</span>
-                        }
-                        else
-                        {
-                            <span class="price actual-price">0.00</span>
-                        }
-                    </div>
+        </div>
+        <div class="col-lg-2">
+            <div class="picture">
+                <div class="picture-thumbs">
+                    @if (string.IsNullOrWhiteSpace(Model.imageUrl))
+                    {
+                        <img class="lazyOwl" alt="@Model.genericDescription" data-src="@Model.imageUrl" src="http://localhost:65283/images/thumbs/default-image_100.png" title="@Model.genericDescription" />
+                    }
+                    else
+                    {
+                        <img class="lazyOwl" alt="@Model.genericDescription" data-src="@Model.imageUrl" src="@Model.imageUrl" title="@Model.genericDescription" />
+                    }
                 </div>
             </div>
         </div>
+        <div class="col-lg-2">
+            <div class="card">
+                <div class="card-body" style="border: 1px solid #efdddd;border-radius: 5px;background-color: #cfc2c2;text-align: center;color: black;">
+                    <p>@Model.partTypeId</p>
+                    <p>Year: @Model.years</p>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-2">
+            <div class="prices">
+                @if (Model.priceAvailable)
+                {
+                    <span class="price actual-price">@Model.price.unitCost</span>
+                }
+                else
+                {
+                    <span class="price actual-price">0.00</span>
+                }
+            </div>
+        </div>
+        <div class="col-lg-1">
+            @Model.availableQuantity
+        </div>
+        @{
+            var price = 0f;
+            if (Model.price is not null)
+                price = Model.price.unitCost;
+        }
+        <div class="col-lg-2">
+            <button class="btn btn-primary btn-sm" onclick="AjaxCart.addproducttocart_catalog('@Url.RouteUrl("AddProductToCart-Catalog", new {genericDescription = Model.genericDescription,catShortDescription = Model.catShortDescription,catLongDescription = Model.catLongDescription,partNumber = Model.partNumber,availableQuantity = Model.availableQuantity,displayQuantity = Model.displayQuantity,unitCost = price,imageUrl = Model.imageUrl, apiProductId = Model.id, shoppingCartTypeId = shoppingCartTypeId, quantity = quantity })');return false;"><i class="fa fa-shopping-cart"></i></button>
+            @*<button type="button" class="button-2 product-box-add-to-cart-button" onclick="AjaxCart.addproducttocart_catalog('@Url.RouteUrl("AddProductToCart-Catalog", new { apiProductId = Model.id, shoppingCartTypeId = shoppingCartTypeId, quantity = quantity })');return false;">@(T("ShoppingCart.AddToCart").Text)</button>*@
+
+            @*<button type="button" class="button-2 product-box-add-to-cart-button" onclick="AjaxCart.addproducttocart_catalog('@addtocartlink');return false;">@(addToCartText)</button>*@
+        </div>
     </div>
 </div>
+
+
+@*<div class="product-item clearfix">
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="caption">
+                <div class="details">
+                    <h3 class="product-title">
+                        <a link="@Model.c2cUrl">@Model.genericDescription</a>
+                    </h3>
+                    <div class="sku">
+                        Manufacturer Name:  @Model.manufacturerName
+                        Manufacturer Code:  @Model.manufacturerCode
+                        Years:  @Model.years
+                    </div>
+
+                    <div class="product-border-bottom"></div>
+                    <div class="description">
+                        @Html.Raw(Model.catLongDescription)
+                    </div>
+                    <div class="add-info">
+                        <div class="buttons">
+                            <div class="prices">
+                                @if (Model.priceAvailable)
+                                {
+                                    <span class="price actual-price">@Model.price.unitCost</span>
+                                }
+                                else
+                                {
+                                    <span class="price actual-price">0.00</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-lg-4">
+            <div class="picture">
+                    <div class="picture-thumbs">
+                        @if (string.IsNullOrWhiteSpace(Model.imageUrl))
+                        {
+                            <img class="lazyOwl" alt="@Model.genericDescription" data-src="@Model.imageUrl" src="http://localhost:65283/images/thumbs/default-image_100.png" title="@Model.genericDescription" />
+                        }
+                        else
+                        {
+                            <img class="lazyOwl" alt="@Model.genericDescription" data-src="@Model.imageUrl" src="@Model.imageUrl" title="@Model.genericDescription" />
+                        }
+                    </div>
+            </div>
+
+        </div>
+    </div>
+
+
+
+
+</div>*@
 

@@ -61,6 +61,7 @@ namespace Nop.Core.Domain.Orders
         /// Gets or sets the date and time of instance update
         /// </summary>
         public DateTime UpdatedOnUtc { get; set; }
+        public string ApiImageUrl { get; set; }
 
         /// <summary>
         /// Gets the log type

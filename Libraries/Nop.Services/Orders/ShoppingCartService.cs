@@ -1631,7 +1631,8 @@ namespace Nop.Services.Orders
                     RentalEndDateUtc = rentalEndDate,
                     CreatedOnUtc = now,
                     UpdatedOnUtc = now,
-                    CustomerId = customer.Id
+                    CustomerId = customer.Id,
+                    ApiImageUrl = product.ApiImageUrl
                 };
 
                 await _sciRepository.InsertAsync(shoppingCartItem);
