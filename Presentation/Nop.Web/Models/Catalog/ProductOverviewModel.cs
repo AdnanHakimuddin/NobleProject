@@ -15,6 +15,18 @@ namespace Nop.Web.Models.Catalog
             ReviewOverviewModel = new ProductReviewOverviewModel();
         }
 
+        //custom fields
+        public string c2cUrl { get; set; }
+        public string manufacturerCode { get; set; }
+        public string manufacturerName { get; set; }
+        public int availableQuantity { get; set; }
+        public string displayQuantity { get; set; }
+        public float unitCost { get; set; }
+        public string imageUrl { get; set; }
+        public int ApiProductId { get; set; }
+        public string years { get; set; }
+        public string partTypeId { get; set; }
+
         public string Name { get; set; }
         public string ShortDescription { get; set; }
         public string FullDescription { get; set; }

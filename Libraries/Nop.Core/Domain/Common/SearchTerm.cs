@@ -19,5 +19,6 @@
         /// Gets or sets search count
         /// </summary>
         public int Count { get; set; }
+        public int CustomerId { get; set; }
     }
 }

@@ -249,7 +249,7 @@
                 </div>
             </form>
         </div>
-        @await Html.PartialAsync("_CatalogSelectors", Model.CatalogProductsModel)
+      @*  @await Html.PartialAsync("_CatalogSelectors", Model.CatalogProductsModel)*@
         @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.ProductSearchPageBeforeResults, additionalData = Model })
         <div class="search-results">
             @{

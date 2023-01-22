@@ -38,7 +38,7 @@ namespace Nop.Services.Common
         /// A task that represents the asynchronous operation
         /// The task result contains the search term
         /// </returns>
-        public virtual async Task<SearchTerm> GetSearchTermByKeywordAsync(string keyword, int storeId)
+        public virtual async Task<SearchTerm> GetSearchTermByKeywordAsync(string keyword, int storeId, int customerId = 0)
         {
             if (string.IsNullOrEmpty(keyword))
                 return null;
@@ -47,6 +47,10 @@ namespace Nop.Services.Common
                         where st.Keyword == keyword && st.StoreId == storeId
                         orderby st.Id
                         select st;
+
+            if (customerId > 0)
+                query = query.Where(x => x.CustomerId == customerId).OrderBy(st => st.Id);
+
             var searchTerm = await query.FirstOrDefaultAsync();
 
             return searchTerm;

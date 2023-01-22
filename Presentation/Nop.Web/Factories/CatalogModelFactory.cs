@@ -81,6 +81,7 @@ namespace Nop.Web.Factories
         private readonly MediaSettings _mediaSettings;
         private readonly VendorSettings _vendorSettings;
         private readonly IGenericAttributeService _genericAttributeService;
+        private readonly IPriceFormatter _priceFormatter;
 
         #endregion
 
@@ -116,7 +117,8 @@ namespace Nop.Web.Factories
             IWorkContext workContext,
             MediaSettings mediaSettings,
             VendorSettings vendorSettings,
-            IGenericAttributeService genericAttributeService)
+            IGenericAttributeService genericAttributeService,
+            IPriceFormatter priceFormatter)
         {
             _blogSettings = blogSettings;
             _catalogSettings = catalogSettings;
@@ -149,6 +151,7 @@ namespace Nop.Web.Factories
             _mediaSettings = mediaSettings;
             _vendorSettings = vendorSettings;
             _genericAttributeService = genericAttributeService;
+            _priceFormatter = priceFormatter;
         }
 
         #endregion
@@ -1809,148 +1812,185 @@ namespace Nop.Web.Factories
             //await _productModelFactory.PrepareVinLookUpAsync(token, searchModel.yid, searchModel.maid, searchModel.moid, searchModel.eid, searchModel.vin);
             //only search if query string search keyword is set (used to avoid searching or displaying search term min length error message on /search page load)
             //we don't use "!string.IsNullOrEmpty(searchTerms)" in cases of "ProductSearchTermMinimumLength" set to 0 but searching by other parameters (e.g. category or price filter)
-            //var isSearchTermSpecified = _httpContextAccessor.HttpContext.Request.Query.ContainsKey("q");
-            //if (isSearchTermSpecified)
-            //{
-            //    var currentStore = await _storeContext.GetCurrentStoreAsync();
+            var isSearchTermSpecified = _httpContextAccessor.HttpContext.Request.Query.ContainsKey("q");
+            if (isSearchTermSpecified)
+            {
+                var currentStore = await _storeContext.GetCurrentStoreAsync();
 
-            //    if (searchTerms.Length < _catalogSettings.ProductSearchTermMinimumLength)
-            //    {
-            //        model.WarningMessage =
-            //            string.Format(await _localizationService.GetResourceAsync("Search.SearchTermMinimumLengthIsNCharacters"),
-            //                _catalogSettings.ProductSearchTermMinimumLength);
-            //    }
-            //    else
-            //    {
-            //        var categoryIds = new List<int>();
-            //        var manufacturerId = 0;
-            //        var searchInDescriptions = false;
-            //        var vendorId = 0;
-            //        if (searchModel.advs)
-            //        {
-            //            //advanced search
-            //            var categoryId = searchModel.cid;
-            //            if (categoryId > 0)
-            //            {
-            //                categoryIds.Add(categoryId);
-            //                if (searchModel.isc)
-            //                {
-            //                    //include subcategories
-            //                    categoryIds.AddRange(
-            //                        await _categoryService.GetChildCategoryIdsAsync(categoryId, currentStore.Id));
-            //                }
-            //            }
+                if (searchTerms.Length < _catalogSettings.ProductSearchTermMinimumLength)
+                {
+                    model.WarningMessage =
+                        string.Format(await _localizationService.GetResourceAsync("Search.SearchTermMinimumLengthIsNCharacters"),
+                            _catalogSettings.ProductSearchTermMinimumLength);
+                }
+                else
+                {
+                    var categoryIds = new List<int>();
+                    var manufacturerId = 0;
+                    var searchInDescriptions = false;
+                    var vendorId = 0;
+                    if (searchModel.advs)
+                    {
+                        //advanced search
+                        var categoryId = searchModel.cid;
+                        if (categoryId > 0)
+                        {
+                            categoryIds.Add(categoryId);
+                            if (searchModel.isc)
+                            {
+                                //include subcategories
+                                categoryIds.AddRange(
+                                    await _categoryService.GetChildCategoryIdsAsync(categoryId, currentStore.Id));
+                            }
+                        }
 
-            //            manufacturerId = searchModel.mid;
+                        manufacturerId = searchModel.mid;
 
-            //            if (searchModel.asv)
-            //                vendorId = searchModel.vid;
+                        if (searchModel.asv)
+                            vendorId = searchModel.vid;
 
-            //            searchInDescriptions = searchModel.sid;
-            //        }
+                        searchInDescriptions = searchModel.sid;
+                    }
 
-            //        //var searchInProductTags = false;
-            //        var searchInProductTags = searchInDescriptions;
-            //        var workingLanguage = await _workContext.GetWorkingLanguageAsync();
+                    //var searchInProductTags = false;
+                    var searchInProductTags = searchInDescriptions;
+                    var workingLanguage = await _workContext.GetWorkingLanguageAsync();
 
-            //        //price range
-            //        PriceRangeModel selectedPriceRange = null;
-            //        if (_catalogSettings.EnablePriceRangeFiltering && _catalogSettings.SearchPagePriceRangeFiltering)
-            //        {
-            //            selectedPriceRange = await GetConvertedPriceRangeAsync(command);
+                    //price range
+                    PriceRangeModel selectedPriceRange = null;
+                    if (_catalogSettings.EnablePriceRangeFiltering && _catalogSettings.SearchPagePriceRangeFiltering)
+                    {
+                        selectedPriceRange = await GetConvertedPriceRangeAsync(command);
 
-            //            PriceRangeModel availablePriceRange;
-            //            if (!_catalogSettings.SearchPageManuallyPriceRange)
-            //            {
-            //                async Task<decimal?> getProductPriceAsync(ProductSortingEnum orderBy)
-            //                {
-            //                    var products = await _productService.SearchProductsAsync(0, 1,
-            //                        categoryIds: categoryIds,
-            //                        manufacturerIds: new List<int> { manufacturerId },
-            //                        storeId: currentStore.Id,
-            //                        visibleIndividuallyOnly: true,
-            //                        keywords: searchTerms,
-            //                        searchDescriptions: searchInDescriptions,
-            //                        searchProductTags: searchInProductTags,
-            //                        languageId: workingLanguage.Id,
-            //                        vendorId: vendorId,
-            //                        orderBy: orderBy);
+                        PriceRangeModel availablePriceRange;
+                        if (!_catalogSettings.SearchPageManuallyPriceRange)
+                        {
+                            async Task<decimal?> getProductPriceAsync(ProductSortingEnum orderBy)
+                            {
+                                var products = await _productService.SearchProductsAsync(0, 1,
+                                    categoryIds: categoryIds,
+                                    manufacturerIds: new List<int> { manufacturerId },
+                                    storeId: currentStore.Id,
+                                    visibleIndividuallyOnly: true,
+                                    keywords: searchTerms,
+                                    searchDescriptions: searchInDescriptions,
+                                    searchProductTags: searchInProductTags,
+                                    languageId: workingLanguage.Id,
+                                    vendorId: vendorId,
+                                    orderBy: orderBy);
 
-            //                    return products?.FirstOrDefault()?.Price ?? 0;
-            //                }
+                                return products?.FirstOrDefault()?.Price ?? 0;
+                            }
 
-            //                availablePriceRange = new PriceRangeModel
-            //                {
-            //                    From = await getProductPriceAsync(ProductSortingEnum.PriceAsc),
-            //                    To = await getProductPriceAsync(ProductSortingEnum.PriceDesc)
-            //                };
-            //            }
-            //            else
-            //            {
-            //                availablePriceRange = new PriceRangeModel
-            //                {
-            //                    From = _catalogSettings.SearchPagePriceFrom,
-            //                    To = _catalogSettings.SearchPagePriceTo
-            //                };
-            //            }
+                            availablePriceRange = new PriceRangeModel
+                            {
+                                From = await getProductPriceAsync(ProductSortingEnum.PriceAsc),
+                                To = await getProductPriceAsync(ProductSortingEnum.PriceDesc)
+                            };
+                        }
+                        else
+                        {
+                            availablePriceRange = new PriceRangeModel
+                            {
+                                From = _catalogSettings.SearchPagePriceFrom,
+                                To = _catalogSettings.SearchPagePriceTo
+                            };
+                        }
 
-            //            model.PriceRangeFilter = await PreparePriceRangeFilterAsync(selectedPriceRange, availablePriceRange);
-            //        }
+                        model.PriceRangeFilter = await PreparePriceRangeFilterAsync(selectedPriceRange, availablePriceRange);
+                    }
 
-            //        //products
-            //        products = await _productService.SearchProductsAsync(
-            //            command.PageNumber - 1,
-            //            command.PageSize,
-            //            categoryIds: categoryIds,
-            //            manufacturerIds: new List<int> { manufacturerId },
-            //            storeId: currentStore.Id,
-            //            visibleIndividuallyOnly: true,
-            //            keywords: searchTerms,
-            //            priceMin: selectedPriceRange?.From,
-            //            priceMax: selectedPriceRange?.To,
-            //            searchDescriptions: searchInDescriptions,
-            //            searchProductTags: searchInProductTags,
-            //            languageId: workingLanguage.Id,
-            //            orderBy: (ProductSortingEnum)command.OrderBy,
-            //            vendorId: vendorId);
+                    //products
+                    products = await _productService.SearchProductsAsync(
+                        command.PageNumber - 1,
+                        command.PageSize,
+                        categoryIds: categoryIds,
+                        manufacturerIds: new List<int> { manufacturerId },
+                        storeId: currentStore.Id,
+                        visibleIndividuallyOnly: true,
+                        keywords: searchTerms,
+                        priceMin: selectedPriceRange?.From,
+                        priceMax: selectedPriceRange?.To,
+                        searchDescriptions: searchInDescriptions,
+                        searchProductTags: searchInProductTags,
+                        languageId: workingLanguage.Id,
+                        orderBy: (ProductSortingEnum)command.OrderBy,
+                        vendorId: vendorId);
 
-            //        //search term statistics
-            //        if (!string.IsNullOrEmpty(searchTerms))
-            //        {
-            //            var searchTerm =
-            //                await _searchTermService.GetSearchTermByKeywordAsync(searchTerms, currentStore.Id);
-            //            if (searchTerm != null)
-            //            {
-            //                searchTerm.Count++;
-            //                await _searchTermService.UpdateSearchTermAsync(searchTerm);
-            //            }
-            //            else
-            //            {
-            //                searchTerm = new SearchTerm
-            //                {
-            //                    Keyword = searchTerms,
-            //                    StoreId = currentStore.Id,
-            //                    Count = 1
-            //                };
-            //                await _searchTermService.InsertSearchTermAsync(searchTerm);
-            //            }
-            //        }
+                    //search term statistics
+                    if (!string.IsNullOrEmpty(searchTerms))
+                    {
+                        var searchTerm =
+                            await _searchTermService.GetSearchTermByKeywordAsync(searchTerms, currentStore.Id);
+                        if (searchTerm != null)
+                        {
+                            searchTerm.Count++;
+                            await _searchTermService.UpdateSearchTermAsync(searchTerm);
+                        }
+                        else
+                        {
+                            searchTerm = new SearchTerm
+                            {
+                                Keyword = searchTerms,
+                                StoreId = currentStore.Id,
+                                Count = 1,
+                                CustomerId = (await _workContext.GetCurrentCustomerAsync()).Id,
+                            };
+                            await _searchTermService.InsertSearchTermAsync(searchTerm);
+                        }
+                    }
 
-            //        //event
-            //        await _eventPublisher.PublishAsync(new ProductSearchEvent
-            //        {
-            //            SearchTerm = searchTerms,
-            //            SearchInDescriptions = searchInDescriptions,
-            //            CategoryIds = categoryIds,
-            //            ManufacturerId = manufacturerId,
-            //            WorkingLanguageId = workingLanguage.Id,
-            //            VendorId = vendorId
-            //        });
-            //    }
-            //}
+                    //event
+                    await _eventPublisher.PublishAsync(new ProductSearchEvent
+                    {
+                        SearchTerm = searchTerms,
+                        SearchInDescriptions = searchInDescriptions,
+                        CategoryIds = categoryIds,
+                        ManufacturerId = manufacturerId,
+                        WorkingLanguageId = workingLanguage.Id,
+                        VendorId = vendorId
+                    });
+                }
+            }
 
-            //var isFiltering = !string.IsNullOrEmpty(searchTerms);
-            //await PrepareCatalogProductsAsync(model, products, isFiltering);
+            var isFiltering = !string.IsNullOrEmpty(searchTerms);
+            await PrepareCatalogProductsAsync(model, products, isFiltering);
+
+            if (model.ProductsData.inquiryResponse is not null && model.ProductsData.inquiryResponse.parts.Count() > 0)
+            {
+                foreach (var item in model.ProductsData.inquiryResponse.parts)
+                {
+                    model.Products.Add(new ProductOverviewModel
+                    {
+                        Id = item.id,
+                        Name = item.genericDescription,
+                        c2cUrl = item.c2cUrl,
+                        manufacturerCode = item.manufacturerCode,
+                        manufacturerName = item.manufacturerName,
+                        availableQuantity = item.availableQuantity,
+                        displayQuantity = item.displayQuantity,
+                        unitCost = item.price is not null ? item.price.unitCost : 0f,
+                        ApiProductId = item.id,
+                        Sku = item.partNumber,
+                        imageUrl = item.imageUrl,
+                        partTypeId = item.partTypeId,
+                        years = item.years,
+                        ProductPrice = new ProductOverviewModel.ProductPriceModel
+                        {
+                            Price = item.priceAvailable && item.price is not null ? await _priceFormatter.FormatPriceAsync(Convert.ToDecimal(item.price.unitCost), true, false) : await _priceFormatter.FormatPriceAsync(0m, true, false),
+                        },
+                        DefaultPictureModel = new PictureModel
+                        {
+                            ImageUrl = string.IsNullOrWhiteSpace(item.imageUrl) ? await _pictureService.GetPictureUrlAsync(0, 75, true) : item.imageUrl,
+                            ThumbImageUrl = string.IsNullOrWhiteSpace(item.imageUrl) ? await _pictureService.GetPictureUrlAsync(0, 75, true) : item.imageUrl,
+                            FullSizeImageUrl = string.IsNullOrWhiteSpace(item.imageUrl) ? await _pictureService.GetPictureUrlAsync(0, 75, true) : item.imageUrl,
+                        },
+                        ProductType = ProductType.SimpleProduct,
+                        FullDescription = item.genericDescription,
+                        ShortDescription = item.genericDescription
+                    });
+                }
+            }
 
             return model;
         }
@@ -2103,7 +2143,7 @@ namespace Nop.Web.Factories
             var partGroup = await _categoryService.GetPartGroupByIdAsync(73);
             if (partGroup is not null)
             {
-                
+
                 var partTypes = await _categoryService.GetAllPartTypesAsync(partGroupId: partGroupId);
                 //model.partTypes = partTypes.Select(x => new PartType { id = x.ApiPartTypeId, groupId = partGroup.ApiPartGroupId, name = x.Name }).ToList();
                 foreach (var item1 in partTypes)
@@ -2118,7 +2158,7 @@ namespace Nop.Web.Factories
             }
             else
             {
-                
+
                 //var partTypes=new List<PartType>() {
                 //    new PartType() {id="",name="",groupId="" },
                 //    new PartType() {id="",name="",groupId="" },
@@ -2148,7 +2188,7 @@ namespace Nop.Web.Factories
                 }
             }
 
-            
+
 
             if (partTypeId > 0)
             {
@@ -2174,7 +2214,7 @@ namespace Nop.Web.Factories
             client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
             client.DefaultRequestHeaders.Add("X-AUTH-TOKEN", token);
 
-            string message = JsonConvert.SerializeObject(myDeserializedClass);
+            string message = JsonConvert.SerializeObject(/*myDeserializedClass*/model);
             byte[] messageBytes = System.Text.Encoding.UTF8.GetBytes(message);
             var content = new ByteArrayContent(messageBytes);
             content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
@@ -2413,13 +2453,5 @@ namespace Nop.Web.Factories
 
         #endregion
 
-
-
-       
-       
-
-       
-
-       
     }
 }

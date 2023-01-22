@@ -18,7 +18,7 @@ namespace Nop.Services.Common
         /// A task that represents the asynchronous operation
         /// The task result contains the search term
         /// </returns>
-        Task<SearchTerm> GetSearchTermByKeywordAsync(string keyword, int storeId);
+        Task<SearchTerm> GetSearchTermByKeywordAsync(string keyword, int storeId, int customerId = 0);
 
         /// <summary>
         /// Gets a search term statistics
