@@ -2103,6 +2103,7 @@ namespace Nop.Web.Factories
             var partGroup = await _categoryService.GetPartGroupByIdAsync(73);
             if (partGroup is not null)
             {
+                
                 var partTypes = await _categoryService.GetAllPartTypesAsync(partGroupId: partGroupId);
                 //model.partTypes = partTypes.Select(x => new PartType { id = x.ApiPartTypeId, groupId = partGroup.ApiPartGroupId, name = x.Name }).ToList();
                 foreach (var item1 in partTypes)
@@ -2117,6 +2118,20 @@ namespace Nop.Web.Factories
             }
             else
             {
+                
+                //var partTypes=new List<PartType>() {
+                //    new PartType() {id="",name="",groupId="" },
+                //    new PartType() {id="",name="",groupId="" },
+                //}
+
+
+                //var _partGroups = new List<PartGroup>()
+                //{
+                //    new PartGroup() { id=1,name="" },
+                //    new PartGroup() { id=1,name="" },
+                //    new PartGroup() { id=1,name="" ,partTypes=},
+                //};
+
                 var partGroups = await _categoryService.GetAllPartGroupsAsync();
                 foreach (var allPartGroup in partGroups)
                 {
@@ -2133,6 +2148,8 @@ namespace Nop.Web.Factories
                 }
             }
 
+            
+
             if (partTypeId > 0)
             {
                 var partType = await _categoryService.GetPartTypeByIdAsync(partTypeId);
@@ -2148,13 +2165,16 @@ namespace Nop.Web.Factories
                 }
             }
 
+            var objectD = "{\r\n  \"disableSellerNetwork\": false,\r\n  \"disableSpecificConditions\": false,\r\n  \"vehicle\": {\r\n    \"specificConditions\": [],\r\n    \"year\": 2014,\r\n    \"makeTypeId\": 1,\r\n    \"make\": 71,\r\n    \"model\": 4,\r\n    \"engine\": 34\r\n  },\r\n  \"partTypes\": [\r\n    {\r\n      \"id\": \"2142\",\r\n      \"name\": \"Oil Filter\",\r\n      \"groupId\": \"1\"\r\n    },\r\n    {\r\n      \"id\": \"12\",\r\n      \"name\": \"*ALL Front Brake Pads/Shoes\",\r\n      \"groupId\": \"27\"\r\n    },\r\n    {\r\n      \"id\": \"560\",\r\n      \"name\": \"Front Disc Brake Pad Sensor Wires\",\r\n      \"groupId\": \"27\"\r\n    }\r\n  ],\r\n  \"partGroups\": [\r\n    {\r\n      \"id\": \"2\",\r\n      \"name\": \"Spark Plugs\"\r\n    },\r\n    {\r\n      \"id\": \"8\",\r\n      \"name\": \"Hoses\",\r\n      \"partTypes\": [\r\n        {\r\n          \"id\": \"661\",\r\n          \"name\": \"By-Pass Hose\",\r\n          \"groupId\": \"8\"\r\n        },\r\n        {\r\n          \"id\": \"1691\",\r\n          \"name\": \"Heater Hose\",\r\n          \"groupId\": \"8\"\r\n        }\r\n      ]\r\n    }\r\n  ],\r\n  \"storeId\": \"1000000537\",\r\n  \"storeKey\": \"XBzDPSlSr8WoBijw\",\r\n  \"coverageKey\": \"640662256\"\r\n}";
+            Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(objectD);
+
             var client = new HttpClient();
             client.DefaultRequestHeaders.Clear();
             client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
             client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
             client.DefaultRequestHeaders.Add("X-AUTH-TOKEN", token);
 
-            string message = JsonConvert.SerializeObject(model);
+            string message = JsonConvert.SerializeObject(myDeserializedClass);
             byte[] messageBytes = System.Text.Encoding.UTF8.GetBytes(message);
             var content = new ByteArrayContent(messageBytes);
             content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
@@ -2392,5 +2412,14 @@ namespace Nop.Web.Factories
         }
 
         #endregion
+
+
+
+       
+       
+
+       
+
+       
     }
 }

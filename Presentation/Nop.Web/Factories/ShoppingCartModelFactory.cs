@@ -389,6 +389,7 @@ namespace Nop.Web.Factories
                 ProductSeName = await _urlRecordService.GetSeNameAsync(product),
                 Quantity = sci.Quantity,
                 AttributeInfo = await _productAttributeFormatter.FormatAttributesAsync(product, sci.AttributesXml),
+                ApiImageUrl = sci.ApiImageUrl
             };
 
             //allow editing?

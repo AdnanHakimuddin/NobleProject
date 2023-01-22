@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Nop.Core;
 using Nop.Core.Caching;
 using Nop.Core.Domain.Catalog;
@@ -807,6 +808,7 @@ namespace Nop.Services.Catalog
             IList<int> manufacturerIds = null,
             int storeId = 0,
             int vendorId = 0,
+            int apiProductId = 0,
             int warehouseId = 0,
             ProductType? productType = null,
             bool visibleIndividuallyOnly = false,
@@ -838,6 +840,10 @@ namespace Nop.Services.Catalog
 
             //apply store mapping constraints
             productsQuery = await _storeMappingService.ApplyStoreMapping(productsQuery, storeId);
+
+            if (apiProductId > 0)
+                productsQuery = productsQuery.Where(x=>x.ApiProductId == apiProductId);
+
 
             //apply ACL constraints
             if (!showHidden)
