@@ -1,8 +1,9 @@
+using Nop.Core.Domain.Seo;
 using System;
 
 namespace Nop.Core.Domain.Catalog
 {
-    public partial class PartGroup : BaseEntity
+    public partial class PartGroup : BaseEntity, ISlugSupported
     {
         public string Name { get; set; }
         public string EngineCode { get; set; }

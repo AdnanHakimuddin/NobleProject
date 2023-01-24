@@ -1,0 +1,34 @@
+﻿@model PartGroupModel
+@using Nop.Core.Domain.Common
+@using Nop.Core.Domain.Seo
+@{
+    Layout = "_ColumnsOne";
+    NopHtml.AppendPageCssClassParts("html-category-page");
+
+}
+
+<div class="page category-page">
+    <div class="page-title panel-heading">
+        <h1>@Model.Name</h1>
+    </div>
+    <div class="page-body">      
+        @*subcategories*@
+        @if (Model.PartTypes.Count > 0)
+        {
+            <div class="sub-category-grid row">
+                @foreach (var item in Model.PartTypes)
+                {
+                    <div class="item-box col-xs-12 col-sm-4 col-md-4">
+                        <div class="sub-category-item">
+                            <h3 class="title">
+                                <a href="#">
+                                    @item.Name
+                                </a>
+                            </h3>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

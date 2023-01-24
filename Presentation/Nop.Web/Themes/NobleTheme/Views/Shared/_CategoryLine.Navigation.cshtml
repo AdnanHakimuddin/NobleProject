@@ -37,6 +37,20 @@
         }
     </a>
     @{
+        if (Model.Category.PartGroups.Count > 0)
+        {
+            <ul class="sublist">
+                @foreach (var partGroup in Model.Category.PartGroups)
+                {
+                    var categoryLineModel = new CategoryNavigationModel.CategoryLineModel
+                    {
+                        CurrentCategoryId = Model.CurrentCategoryId,
+                        PartGroup = partGroup
+                    };
+                    @await Html.PartialAsync("_CategoryLine.Navigation", categoryLineModel)
+                }
+            </ul>
+        }
         if (Model.Category.Id == Model.CurrentCategoryId ||
             Model.Category.SubCategories.Count(BreadCrumbContainsCurrentCategoryId) > 0)
         {

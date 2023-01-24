@@ -236,6 +236,27 @@ namespace Nop.Web.Controllers
 
         #endregion
 
+        #region Part group
+
+        public virtual async Task<IActionResult> PartGroup(int partGroupId, CatalogProductsCommand command)
+        {
+            var partGroup = await _categoryService.GetPartGroupByIdAsync(partGroupId);
+            if (partGroup is null)
+                return InvokeHttp404();
+
+            //model
+            var model = new PartGroupModel();
+            model.Name = partGroup.Name;
+
+            var partTypes = await _categoryService.GetAllPartTypesAsync(partGroupId:partGroupId);
+            foreach (var partType in partTypes)
+                model.PartTypes.Add(new PartGroupModel.PartTypeModel { Id = partType.Id, Name = partType.Name });
+
+            return View(model);
+        }
+
+        #endregion
+
         #region Manufacturers
 
         public virtual async Task<IActionResult> Manufacturer(int manufacturerId, CatalogProductsCommand command)
@@ -561,7 +582,7 @@ namespace Nop.Web.Controllers
             });
         }
 
-        public class PartGroup
+        public class PartGroups
         {
             public string id { get; set; }
             public string name { get; set; }
@@ -580,7 +601,7 @@ namespace Nop.Web.Controllers
         {
             public string id { get; set; }
             public string name { get; set; }
-            public List<PartGroup> partGroups { get; set; }
+            public List<PartGroups> partGroups { get; set; }
         }
 
         #endregion

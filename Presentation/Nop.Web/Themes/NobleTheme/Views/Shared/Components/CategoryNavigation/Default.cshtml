@@ -30,7 +30,7 @@
             liClass += " last";
         }
 
-        <li class="@liClass">
+        <li class="@liClass sadasd">
             <a href="@Url.RouteUrl("Category", new { SeName = lineModel.Category.SeName })">
                 @lineModel.Category.Name
                 @if (lineModel.Category.NumberOfProducts.HasValue)
@@ -38,19 +38,35 @@
                     <text> </text>@T("Categories.TotalProducts", lineModel.Category.NumberOfProducts.Value)
                 }
             </a>
+            <a href="@Url.RouteUrl("PartGroup", new { SeName = lineModel.PartGroup.SeName })">
+                @lineModel.PartGroup.Name
+            </a>
             @{
                 if (lineModel.Category.Id == lineModel.CurrentCategoryId ||
-                lineModel.Category.SubCategories.Count(BreadCrumbContainsCurrentCategoryId) > 0)
+                lineModel.Category.SubCategories.Count(BreadCrumbContainsCurrentCategoryId) > 0 || lineModel.Category.PartGroups.Count > 0 )
                 {
-                    if (lineModel.Category.SubCategories.Count > 0)
+                    if (lineModel.Category.SubCategories.Count > 0|| lineModel.Category.PartGroups.Count > 0 )
                     {
+                        <ul class="sublist">
+                            @foreach (var partGroup in lineModel.Category.PartGroups)
+                            {
+                                var categoryLineModel = new CategoryNavigationModel.CategoryLineModel
+                                {
+                                    CurrentCategoryId = lineModel.CurrentCategoryId,
+                                    Category = lineModel.Category,
+                                    PartGroup= partGroup
+                                };
+                                await CategoryLine(categoryLineModel);
+                            }
+                        </ul>
                         <ul class="sublist">
                             @foreach (var subCategory in lineModel.Category.SubCategories)
                             {
                                 var categoryLineModel = new CategoryNavigationModel.CategoryLineModel
                                 {
                                     CurrentCategoryId = lineModel.CurrentCategoryId,
-                                    Category = subCategory
+                                    Category = subCategory,
+                                    PartGroup= subCategory.PartGroups.FirstOrDefault()
                                 };
                                 await CategoryLine(categoryLineModel);
                             }
@@ -74,7 +90,8 @@
                     var categoryLineModel = new CategoryNavigationModel.CategoryLineModel
                     {
                         CurrentCategoryId = Model.CurrentCategoryId,
-                        Category = category
+                        Category = category,
+                        PartGroup = category.PartGroups.FirstOrDefault()
                     };
                     await CategoryLine(categoryLineModel);
                 }

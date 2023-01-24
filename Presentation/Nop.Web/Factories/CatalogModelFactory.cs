@@ -953,6 +953,38 @@ namespace Nop.Web.Factories
                         await _productService.GetNumberOfProductsInCategoryAsync(categoryIds, store.Id);
                 }
 
+
+                //Part groups 
+                var partGroups = new List<CategorySimpleModel.PartGroupModel>();
+                var partGroupMappings = await _categoryService.GetCategoryPartGroupsByCategoryIdAsync(category.Id);
+                foreach (var partGroupMapping in partGroupMappings)
+                {
+                    var partGroup = await _categoryService.GetPartGroupByIdAsync(partGroupMapping.PartGroupId);
+                    if (partGroup is not null)
+                    {
+                        var partTypeList = new List<CategorySimpleModel.PartGroupModel.PartTypeModel>();
+                        //part types
+                        var partTypes = await _categoryService.GetAllPartTypesAsync(partGroupId: partGroup.Id);
+                        foreach (var partType in partTypes)
+                        {
+                            partTypeList.Add(new CategorySimpleModel.PartGroupModel.PartTypeModel
+                            {
+                                Id = partType.Id,
+                                Name = partType.Name,
+                            });
+                        }
+                        partGroups.Add(new CategorySimpleModel.PartGroupModel
+                        {
+
+                            Id = partGroup.Id,
+                            Name = partGroup.Name,
+                            SeName = await _urlRecordService.GetSeNameAsync(partGroup),
+                            PartTypes = partTypeList
+                        });
+                        categoryModel.PartGroups.AddRange(partGroups);
+
+                    }
+                }
                 if (loadSubCategories)
                 {
                     var subCategories = await PrepareCategorySimpleModelsAsync(category.Id);

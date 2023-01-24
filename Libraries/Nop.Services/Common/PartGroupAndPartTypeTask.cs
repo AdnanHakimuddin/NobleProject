@@ -212,6 +212,10 @@ namespace Nop.Services.Common
                                 };
                                 await _categoryService.InsertPartGroupAsync(partGroup);
 
+                                //search engine name
+                                var partGroupSeName = await _urlRecordService.ValidateSeNameAsync(partGroup, partGroup.Name, partGroup.Name, true);
+                                await _urlRecordService.SaveSlugAsync(partGroup, partGroupSeName, 0);
+
                                 //Insert Category part group
                                 await _categoryService.InsertCategoryPartGroupAsync(new CategoryPartGroup
                                 {
@@ -278,6 +282,10 @@ namespace Nop.Services.Common
                                     ApiPartGroupId = group.id,
                                 };
                                 await _categoryService.InsertPartGroupAsync(partGroup);
+
+                                //search engine name
+                                var partGroupSeName = await _urlRecordService.ValidateSeNameAsync(partGroup, partGroup.Name, partGroup.Name, true);
+                                await _urlRecordService.SaveSlugAsync(partGroup, partGroupSeName, 0);
 
                                 //Insert Category part group
                                 await _categoryService.InsertCategoryPartGroupAsync(new CategoryPartGroup
