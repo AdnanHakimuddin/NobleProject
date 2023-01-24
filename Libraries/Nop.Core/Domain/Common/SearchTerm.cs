@@ -20,5 +20,9 @@
         /// </summary>
         public int Count { get; set; }
         public int CustomerId { get; set; }
+        public int YearId { get; set; }
+        public int MakeId { get; set; }
+        public int ModelId { get; set; }
+        public int EngineId { get; set; }
     }
 }

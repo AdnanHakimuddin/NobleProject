@@ -1921,7 +1921,7 @@ namespace Nop.Web.Factories
                     if (!string.IsNullOrEmpty(searchTerms))
                     {
                         var searchTerm =
-                            await _searchTermService.GetSearchTermByKeywordAsync(searchTerms, currentStore.Id);
+                            await _searchTermService.GetSearchTermByKeywordAsync(searchTerms, currentStore.Id, (await _workContext.GetCurrentCustomerAsync()).Id, searchModel.yid, searchModel.maid, searchModel.moid, searchModel.eid);
                         if (searchTerm != null)
                         {
                             searchTerm.Count++;
@@ -1935,6 +1935,10 @@ namespace Nop.Web.Factories
                                 StoreId = currentStore.Id,
                                 Count = 1,
                                 CustomerId = (await _workContext.GetCurrentCustomerAsync()).Id,
+                                YearId = searchModel.yid,
+                                MakeId = searchModel.maid,
+                                ModelId = searchModel.moid,
+                                EngineId = searchModel.eid
                             };
                             await _searchTermService.InsertSearchTermAsync(searchTerm);
                         }

@@ -1121,10 +1121,14 @@ namespace Nop.Web.Areas.Admin.Factories
             //prepare list model
             var model = new PopularSearchTermListModel().PrepareToGrid(searchModel, searchTermRecordLines, () =>
             {
-                return searchTermRecordLines.Select(searchTerm => new PopularSearchTermModel
+                return searchTermRecordLines.SelectAwait(async searchTerm => new PopularSearchTermModel
                 {
                     Keyword = searchTerm.Keyword,
-                    Count = searchTerm.Count
+                    Count = searchTerm.Count,
+                    Year = searchTerm.Year > 0 ? (await _productService.GetYearByIdAsync(searchTerm.Year)).Name : "",
+                    Make = searchTerm.Make > 0 ? (await _productService.GetMakeByIdAsync(searchTerm.Make))?.Name : "",
+                    Model = searchTerm.Model > 0 ? (await _productService.GetModelByIdAsync(searchTerm.Model))?.Name : "",
+                    Engine = searchTerm.Engine > 0 ? (await _productService.GetEngineByIdAsync(searchTerm.Engine))?.Name : "",
                 });
             });
 

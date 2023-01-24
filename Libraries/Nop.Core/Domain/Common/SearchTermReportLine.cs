@@ -14,5 +14,13 @@
         /// Gets or sets search count
         /// </summary>
         public int Count { get; set; }
+
+        public int Year { get; set; }
+
+        public int Make { get; set; }
+
+        public int Model { get; set; }
+
+        public int Engine { get; set; }
     }
 }

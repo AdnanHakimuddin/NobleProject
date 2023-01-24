@@ -38,7 +38,7 @@ namespace Nop.Services.Common
         /// A task that represents the asynchronous operation
         /// The task result contains the search term
         /// </returns>
-        public virtual async Task<SearchTerm> GetSearchTermByKeywordAsync(string keyword, int storeId, int customerId = 0)
+        public virtual async Task<SearchTerm> GetSearchTermByKeywordAsync(string keyword, int storeId, int customerId = 0, int yearId = 0, int makeId = 0, int modelId = 0, int engineId = 0)
         {
             if (string.IsNullOrEmpty(keyword))
                 return null;
@@ -50,6 +50,18 @@ namespace Nop.Services.Common
 
             if (customerId > 0)
                 query = query.Where(x => x.CustomerId == customerId).OrderBy(st => st.Id);
+
+            if (yearId > 0)
+                query = query.Where(x => x.YearId == yearId).OrderBy(st => st.Id);
+
+            if (makeId > 0)
+                query = query.Where(x => x.MakeId == makeId).OrderBy(st => st.Id);
+
+            if (modelId > 0)
+                query = query.Where(x => x.ModelId == modelId).OrderBy(st => st.Id);
+
+            if (engineId > 0)
+                query = query.Where(x => x.EngineId == engineId).OrderBy(st => st.Id);
 
             var searchTerm = await query.FirstOrDefaultAsync();
 
@@ -67,21 +79,32 @@ namespace Nop.Services.Common
         /// </returns>
         public virtual async Task<IPagedList<SearchTermReportLine>> GetStatsAsync(int pageIndex = 0, int pageSize = int.MaxValue)
         {
-            var query = (from st in _searchTermRepository.Table
-                         group st by st.Keyword into groupedResult
-                         select new
-                         {
-                             Keyword = groupedResult.Key,
-                             Count = groupedResult.Sum(o => o.Count)
-                         })
-                        .OrderByDescending(m => m.Count)
-                        .Select(r => new SearchTermReportLine
-                        {
-                            Keyword = r.Keyword,
-                            Count = r.Count
-                        });
+            var query = _searchTermRepository.Table;
+            var data = query.Select(x => new { x }).GroupBy(x => new { x.x.YearId, x.x.MakeId, x.x.ModelId, x.x.EngineId, x.x.Keyword }).Select(x => new SearchTermReportLine()
+            {
+                Keyword = x.FirstOrDefault().x.Keyword,
+                Year = x.FirstOrDefault().x.YearId,
+                Make = x.FirstOrDefault().x.MakeId,
+                Model = x.FirstOrDefault().x.ModelId,
+                Engine = x.FirstOrDefault().x.EngineId,
+                Count = x.Select(x => x.x.Count).Sum()
+            }).OrderByDescending(x => x.Count);
 
-            var result = await query.ToPagedListAsync(pageIndex, pageSize);
+            //var query = (from st in _searchTermRepository.Table
+            //             group st by st.Keyword into groupedResult
+            //             select new
+            //             {
+            //                 Keyword = groupedResult.Key,
+            //                 Count = groupedResult.Sum(o => o.Count)
+            //             })
+            //            .OrderByDescending(m => m.Count)
+            //            .Select(r => new SearchTermReportLine
+            //            {
+            //                Keyword = r.Keyword,
+            //                Count = r.Count
+            //            });
+
+            var result = await data.ToPagedListAsync(pageIndex, pageSize);
 
             return result;
         }
