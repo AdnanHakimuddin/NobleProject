@@ -502,6 +502,36 @@ namespace Nop.Web.Factories
                 CatalogProductsModel = await PrepareCategoryProductsModelAsync(category, command)
             };
 
+            //Part groups 
+            var partGroups = new List<CategoryModel.PartGroupModel>();
+            var partGroupMappings = await _categoryService.GetCategoryPartGroupsByCategoryIdAsync(category.Id);
+            foreach (var partGroupMapping in partGroupMappings)
+            {
+                var partGroup = await _categoryService.GetPartGroupByIdAsync(partGroupMapping.PartGroupId);
+                if (partGroup is not null)
+                {
+                    var partTypeList = new List<CategoryModel.PartGroupModel.PartTypeModel>();
+                    //part types
+                    var partTypes = await _categoryService.GetAllPartTypesAsync(partGroupId: partGroup.Id);
+                    foreach (var partType in partTypes)
+                    {
+                        partTypeList.Add(new CategoryModel.PartGroupModel.PartTypeModel
+                        {
+                            Id = partType.Id,
+                            Name = partType.Name,
+                        });
+                    }
+                    model.PartGroups.Add(new CategoryModel.PartGroupModel
+                    {
+
+                        Id = partGroup.Id,
+                        Name = partGroup.Name,
+                        SeName = await _urlRecordService.GetSeNameAsync(partGroup),
+                        PartTypes = partTypeList
+                    });
+
+                }
+            }
             //category breadcrumb
             if (_catalogSettings.CategoryBreadcrumbEnabled)
             {

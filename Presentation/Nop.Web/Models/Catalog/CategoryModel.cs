@@ -12,6 +12,7 @@ namespace Nop.Web.Models.Catalog
             FeaturedProducts = new List<ProductOverviewModel>();
             SubCategories = new List<SubCategoryModel>();
             CategoryBreadcrumb = new List<CategoryModel>();
+            PartGroups = new List<PartGroupModel>();
             CatalogProductsModel = new CatalogProductsModel();
         }
 
@@ -26,6 +27,7 @@ namespace Nop.Web.Models.Catalog
 
         public bool DisplayCategoryBreadcrumb { get; set; }
         public IList<CategoryModel> CategoryBreadcrumb { get; set; }
+        public IList<PartGroupModel> PartGroups { get; set; }
         
         public IList<SubCategoryModel> SubCategories { get; set; }
 
@@ -49,6 +51,24 @@ namespace Nop.Web.Models.Catalog
             public string Description { get; set; }
 
             public PictureModel PictureModel { get; set; }
+        }
+        public partial record PartGroupModel : BaseNopEntityModel
+        {
+            public PartGroupModel()
+            {
+                PartTypes = new List<PartTypeModel>();
+            }
+
+            public string Name { get; set; }
+
+            public string SeName { get; set; }
+
+            public IList<PartTypeModel> PartTypes { get; set; }
+
+            public partial record PartTypeModel : BaseNopEntityModel
+            {
+                public string Name { get; set; }
+            }
         }
 
 		#endregion

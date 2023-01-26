@@ -129,6 +129,13 @@ namespace Nop.Web.Framework.Mvc.Routing
                     values[NopPathRouteDefaults.CategoryIdFieldKey] = urlRecord.EntityId;
                     values[NopPathRouteDefaults.SeNameFieldKey] = urlRecord.Slug;
                     break;
+                    
+                case "partgroup":
+                    values[NopPathRouteDefaults.ControllerFieldKey] = "Catalog";
+                    values[NopPathRouteDefaults.ActionFieldKey] = "PartGroup";
+                    values[NopPathRouteDefaults.PartGroupIdFieldKey] = urlRecord.EntityId;
+                    values[NopPathRouteDefaults.SeNameFieldKey] = urlRecord.Slug;
+                    break;
 
                 case "manufacturer":
                     values[NopPathRouteDefaults.ControllerFieldKey] = "Catalog";

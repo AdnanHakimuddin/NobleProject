@@ -76,6 +76,23 @@
             </div>
         }
         @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.CategoryDetailsBeforeSubcategories, additionalData = Model })
+        @if (Model.PartGroups.Count > 0)
+        {
+            <div class="sub-category-grid row">
+                @foreach (var item in Model.PartGroups)
+                {
+                    <div class="item-box col-xs-12 col-sm-4 col-md-4">
+                        <div class="sub-category-item">
+                            <h3 class="title">
+                                <a href="@Url.RouteUrl("PartGroup", new { SeName = item.SeName })" title="@item.Name">
+                                    @item.Name
+                                </a>
+                            </h3>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
         @*subcategories*@
         @if (Model.SubCategories.Count > 0)
         {

@@ -32,6 +32,8 @@
         /// </summary>
         public static string CategoryIdFieldKey => "categoryid";
 
+        public static string PartGroupIdFieldKey => "partgroupid";
+
         /// <summary>
         /// Gets default key for manufacturer id field
         /// </summary>
