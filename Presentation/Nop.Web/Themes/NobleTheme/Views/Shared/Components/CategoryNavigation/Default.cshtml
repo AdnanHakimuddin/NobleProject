@@ -25,15 +25,14 @@
         var active = lineModel.Category.Id == lineModel.CurrentCategoryId || lineModel.Category.SubCategories.Count(BreadCrumbContainsCurrentCategoryId) > 0;
         var last = lineModel.Category.Id == lineModel.CurrentCategoryId;
         var liClass = active ? "active" : "inactive";
-        int count = 0;
 
         if (active)
         {
             liClass += " last";
         }
 
-        <li class="@liClass sadasd">
-            <a href="@Url.RouteUrl("Category", new { SeName = lineModel.Category.SeName })">
+        <li class="@liClass">
+            <a href="@Url.RouteUrl("Category", new { SeName = lineModel.Category.SeName })" id="parent">
                 @lineModel.Category.Name
                 @if (lineModel.Category.NumberOfProducts.HasValue)
                 {
@@ -42,40 +41,57 @@
                     @T("Categories.TotalProducts", lineModel.Category.NumberOfProducts.Value)
                 }
             </a>
-                @foreach (var partGroup in lineModel.PartGroups)
-                {
-                    <a href="@Url.RouteUrl("PartGroup", new { SeName = partGroup.SeName })">
-                        @count @partGroup.Name
-                    </a>
-                }
             @{
                 if (lineModel.Category.Id == lineModel.CurrentCategoryId ||
                 lineModel.Category.SubCategories.Count(BreadCrumbContainsCurrentCategoryId) > 0 || lineModel.Category.PartGroups.Count > 0)
                 {
                     if (lineModel.Category.SubCategories.Count > 0 || lineModel.Category.PartGroups.Count > 0)
                     {
-                        //<ul class="sublist">
-                        //    @foreach (var partGroup in lineModel.Category.PartGroups)
-                        //    {
-                        //        var categoryLineModel = new CategoryNavigationModel.CategoryLineModel
-                        //        {
-                        //            CurrentCategoryId = lineModel.CurrentCategoryId,
-                        //            Category = lineModel.Category,
-                        //            PartGroup= partGroup
-                        //        };
-                        //        await CategoryLine(categoryLineModel);
-                        //    }
-                        //</ul>
                         <ul class="sublist">
-                            @foreach (var subCategory in lineModel.Category.SubCategories)
+                            @foreach (var partGroup in lineModel.Category.PartGroups)
                             {
                                 var categoryLineModel = new CategoryNavigationModel.CategoryLineModel
-                                {
-                                    CurrentCategoryId = lineModel.CurrentCategoryId,
-                                    Category = subCategory,
-                                    PartGroups = subCategory.PartGroups
-                                };
-                                await CategoryLine(categoryLineModel);
+                                    {
+                                        CurrentCategoryId = lineModel.CurrentCategoryId,
+                                        Category = lineModel.Category,
+                                        PartGroup = partGroup,
+                                        ActivePartGroups = lineModel.CurrentCategoryId == lineModel.Category.Id
+                                    };
+                                await PartGroupLine(categoryLineModel);
+                            }
+                        </ul>
+                    }
+                }
+            }
+        </li>
+    }
+
+    async Task PartGroupLine(CategoryNavigationModel.CategoryLineModel lineModel)
+    {
+        var style = "display:none";
+        if (lineModel.ActivePartGroups)
+        {
+            style = "";
+        }
+
+        <li class="" id="child" style="@style">
+            <a href="@Url.RouteUrl("PartGroup", new { SeName =  @lineModel.PartGroup.SeName })">
+                @lineModel.PartGroup.Name
+            </a>
+            @{
+                if (lineModel.Category.Id == lineModel.CurrentCategoryId ||
+                lineModel.Category.SubCategories.Count(BreadCrumbContainsCurrentCategoryId) > 0 || lineModel.Category.PartGroups.Count > 0)
+                {
+                    if (lineModel.Category.SubCategories.Count > 0 || lineModel.Category.PartGroups.Count > 0)
+                    {
+                        <ul class="part-group">
+                            @foreach (var partGroup in lineModel.Category.PartGroups)
+                            {
+                                var categoryLineModel = new CategoryNavigationModel.CategoryLineModel
+                                    {
+                                        CurrentPartGroupId = lineModel.CurrentPartGroupId,
+                                        PartGroup = partGroup,
+                                    };
                             }
                         </ul>
                     }
@@ -98,7 +114,7 @@
                     {
                         CurrentCategoryId = Model.CurrentCategoryId,
                         Category = category,
-                        PartGroups = category.PartGroups
+                        //PartGroups = category.PartGroups
                     };
                     await CategoryLine(categoryLineModel);
                 }
