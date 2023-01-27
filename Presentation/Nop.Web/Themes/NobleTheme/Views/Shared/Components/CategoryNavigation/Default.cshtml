@@ -25,7 +25,9 @@
         var active = lineModel.Category.Id == lineModel.CurrentCategoryId || lineModel.Category.SubCategories.Count(BreadCrumbContainsCurrentCategoryId) > 0;
         var last = lineModel.Category.Id == lineModel.CurrentCategoryId;
         var liClass = active ? "active" : "inactive";
-        if (last)
+        int count = 0;
+
+        if (active)
         {
             liClass += " last";
         }
@@ -35,17 +37,22 @@
                 @lineModel.Category.Name
                 @if (lineModel.Category.NumberOfProducts.HasValue)
                 {
-                    <text> </text>@T("Categories.TotalProducts", lineModel.Category.NumberOfProducts.Value)
+                    <text> </text>
+
+                    @T("Categories.TotalProducts", lineModel.Category.NumberOfProducts.Value)
                 }
             </a>
-            @*<a href="@Url.RouteUrl("PartGroup", new { SeName = lineModel.PartGroup.SeName })">
-                @lineModel.PartGroup.Name
-            </a>*@
+                @foreach (var partGroup in lineModel.PartGroups)
+                {
+                    <a href="@Url.RouteUrl("PartGroup", new { SeName = partGroup.SeName })">
+                        @count @partGroup.Name
+                    </a>
+                }
             @{
                 if (lineModel.Category.Id == lineModel.CurrentCategoryId ||
-                lineModel.Category.SubCategories.Count(BreadCrumbContainsCurrentCategoryId) > 0 || lineModel.Category.PartGroups.Count > 0 )
+                lineModel.Category.SubCategories.Count(BreadCrumbContainsCurrentCategoryId) > 0 || lineModel.Category.PartGroups.Count > 0)
                 {
-                    if (lineModel.Category.SubCategories.Count > 0|| lineModel.Category.PartGroups.Count > 0 )
+                    if (lineModel.Category.SubCategories.Count > 0 || lineModel.Category.PartGroups.Count > 0)
                     {
                         //<ul class="sublist">
                         //    @foreach (var partGroup in lineModel.Category.PartGroups)
@@ -66,7 +73,7 @@
                                 {
                                     CurrentCategoryId = lineModel.CurrentCategoryId,
                                     Category = subCategory,
-                                    PartGroup= subCategory.PartGroups.FirstOrDefault()
+                                    PartGroups = subCategory.PartGroups
                                 };
                                 await CategoryLine(categoryLineModel);
                             }
@@ -91,7 +98,7 @@
                     {
                         CurrentCategoryId = Model.CurrentCategoryId,
                         Category = category,
-                        PartGroup = category.PartGroups.FirstOrDefault()
+                        PartGroups = category.PartGroups
                     };
                     await CategoryLine(categoryLineModel);
                 }

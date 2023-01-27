@@ -12,14 +12,19 @@ namespace Nop.Web.Models.Catalog
 
         public int CurrentCategoryId { get; set; }
         public List<CategorySimpleModel> Categories { get; set; }
-
         #region Nested classes
 
         public record CategoryLineModel : BaseNopModel
         {
+            public CategoryLineModel()
+            {
+                PartGroups = new List<CategorySimpleModel.PartGroupModel>();
+            }
             public int CurrentCategoryId { get; set; }
             public CategorySimpleModel Category { get; set; }
             public CategorySimpleModel.PartGroupModel PartGroup { get; set; }
+            public List<CategorySimpleModel.PartGroupModel> PartGroups { get; set; }
+
         }
 
         #endregion
