@@ -48,7 +48,7 @@
                     if (lineModel.Category.SubCategories.Count > 0 || lineModel.Category.PartGroups.Count > 0)
                     {
                         <ul class="sublist">
-                            @foreach (var partGroup in lineModel.Category.PartGroups)
+                            @foreach (var partGroup in lineModel.Category.PartGroups.DistinctBy(x=>x.Id).ToList())
                             {
                                 var categoryLineModel = new CategoryNavigationModel.CategoryLineModel
                                     {
@@ -85,7 +85,7 @@
                     if (lineModel.Category.SubCategories.Count > 0 || lineModel.Category.PartGroups.Count > 0)
                     {
                         <ul class="part-group">
-                            @foreach (var partGroup in lineModel.Category.PartGroups)
+                            @foreach (var partGroup in lineModel.Category.PartGroups.DistinctBy(x=>x.Id).ToList())
                             {
                                 var categoryLineModel = new CategoryNavigationModel.CategoryLineModel
                                     {
